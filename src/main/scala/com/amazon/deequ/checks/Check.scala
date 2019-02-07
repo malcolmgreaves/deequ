@@ -673,7 +673,7 @@ case class Check(
     : CheckWithLastConstraintFilterable = {
 
     // coalescing column to not count NULL values as non-compliant
-    satisfies(s"COALESCE($column, 0.0) >= 0", s"$column is non-negative", hint = hint)
+    satisfies(s"COALESCE(`$column`, 0.0) >= 0", s"$column is non-negative", hint = hint)
   }
 
   /**
@@ -684,7 +684,7 @@ case class Check(
     */
   def isPositive(column: String): CheckWithLastConstraintFilterable = {
     // coalescing column to not count NULL values as non-compliant
-    satisfies(s"COALESCE($column, 1.0) > 0", s"$column is positive")
+    satisfies(s"COALESCE(`$column`, 1.0) > 0", s"$column is positive")
   }
 
   /**
@@ -702,7 +702,7 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
-    satisfies(s"$columnA < $columnB", s"$columnA is less than $columnB",
+    satisfies(s"`$columnA` < `$columnB`", s"$columnA is less than $columnB",
       hint = hint)
   }
 
@@ -720,7 +720,7 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
-    satisfies(s"$columnA <= $columnB", s"$columnA is less than or equal to $columnB",
+    satisfies(s"`$columnA` <= `$columnB`", s"$columnA is less than or equal to $columnB",
       hint = hint)
   }
 
@@ -738,7 +738,7 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
-    satisfies(s"$columnA > $columnB", s"$columnA is greater than $columnB",
+    satisfies(s"`$columnA` > `$columnB`", s"$columnA is greater than $columnB",
       hint = hint)
   }
 
@@ -757,7 +757,7 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
-    satisfies(s"$columnA >= $columnB", s"$columnA is greater than or equal to $columnB",
+    satisfies(s"`$columnA` >= `$columnB`", s"$columnA is greater than or equal to $columnB",
       hint = hint)
   }
 
@@ -831,7 +831,6 @@ case class Check(
       assertion: Double => Boolean,
       hint: Option[String])
     : CheckWithLastConstraintFilterable = {
-
 
     val valueList = allowedValues
       .map { _.replaceAll("'", "''") }

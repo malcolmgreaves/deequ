@@ -132,8 +132,13 @@ case class FrequenciesAndNumRows(frequencies: DataFrame, numRows: Long)
       .filterNot { _ == COUNT_COL }
 
     val projectionAfterMerge =
-      columns.map { column => coalesce(col(s"this.$column"), col(s"other.$column")).as(column) } ++
-        Seq((zeroIfNull(s"this.$COUNT_COL") + zeroIfNull(s"other.$COUNT_COL")).as(COUNT_COL))
+      columns
+        .map { column =>
+          coalesce(col(s"this.`$column`"), col(s"other.`$column`")).as(column)
+        } ++
+        Seq(
+          (zeroIfNull(s"this.$COUNT_COL") + zeroIfNull(s"other.$COUNT_COL")).as(COUNT_COL)
+        )
 
     /* Null-safe join condition over equality on grouping columns */
     val joinCondition = columns.tail
@@ -148,7 +153,7 @@ case class FrequenciesAndNumRows(frequencies: DataFrame, numRows: Long)
   }
 
   private[analyzers] def nullSafeEq(column: String): Column = {
-    col(s"this.$column") <=> col(s"other.$column")
+    col(s"this.`$column`") <=> col(s"other.`$column`")
   }
 
   private[analyzers] def zeroIfNull(column: String): Column = {
