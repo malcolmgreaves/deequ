@@ -135,9 +135,9 @@ case class FrequenciesAndNumRows(frequencies: DataFrame, numRows: Long)
       val (sanitizedColumns, errors) = columns
         .map { ColumnName.sanitizeForSql }
         .foldLeft((Seq.empty[String], Seq.empty[SanitizeError])) {
-          case ((s,e), c) => c match {
-            case Right(sanitizedColumnName) => (s :+ sanitizedColumnName, e)
-            case Left(error) => (s, e :+ error)
+          case ((sanitizedColumns, errors), sanitizeResult) => sanitizeResult match {
+            case Right(c) => (sanitizedColumns :+ c, errors)
+            case Left(e) => (sanitizedColumns, errors :+ e)
           }
         }
       if (errors.nonEmpty) {

@@ -53,8 +53,8 @@ case class FractionalCategoricalRangeRule(targetDataCoverageFraction: Double = 0
   }
 
   override def candidate(profile: ColumnProfile, numRecords: Long): ConstraintSuggestion =
-    ColumnName.sanitizeForSql(profile.column) {
-      case Left(c) =>
+    ColumnName.sanitizeForSql(profile.column) match {
+      case Right(c) =>
         val topCategories = getTopCategoriesForFractionalDataCoverage(profile,
           targetDataCoverageFraction)
         val ratioSums = topCategories.map { case (_, categoryValue) => categoryValue.ratio }.sum
@@ -98,7 +98,7 @@ case class FractionalCategoricalRangeRule(targetDataCoverageFraction: Double = 0
              | _ >= $targetCompliance, Some("$hint"))""".stripMargin.replaceAll("\n", "")
         )
 
-      case Right(e) => throw e
+      case Left(e) => throw e
     }
 
   private[this] def getTopCategoriesForFractionalDataCoverage(
