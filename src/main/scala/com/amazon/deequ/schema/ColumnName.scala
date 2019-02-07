@@ -18,12 +18,6 @@ package com.amazon.deequ.schema
 
 object ColumnName {
 
-  sealed abstract class SanitizeError(message: String) extends Exception(message)
-  case class ColumnNameHasBackticks(column: String) extends SanitizeError(
-    s"Column name ($column) has backticks (non-sanitizing), which is not allowed in Spark SQL."
-  )
-  case object EmptyColumn extends SanitizeError("Empty column name is invalid")
-
   /**
     * Sanitizes the input column name by ensuring that it is escaped with backticks.
     *
@@ -59,3 +53,9 @@ object ColumnName {
     }
 
 }
+
+sealed abstract class SanitizeError(message: String) extends Exception(message)
+case class ColumnNameHasBackticks(column: String) extends SanitizeError(
+  s"Column name ($column) has backticks (non-sanitizing), which is not allowed in Spark SQL."
+)
+case object EmptyColumn extends SanitizeError("Empty column name is invalid")
