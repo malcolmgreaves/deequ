@@ -25,6 +25,8 @@ import com.amazon.deequ.metrics.{Distribution, Metric}
 import com.amazon.deequ.repository.MetricsRepository
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import com.amazon.deequ.anomalydetection.HistoryUtils
+import com.amazon.deequ.schema.ColumnName
+
 import scala.util.matching.Regex
 
 object CheckLevel extends Enumeration {
@@ -670,11 +672,13 @@ case class Check(
   def isNonNegative(
       column: String,
       hint: Option[String] = None)
-    : CheckWithLastConstraintFilterable = {
-
-    // coalescing column to not count NULL values as non-compliant
-    satisfies(s"COALESCE(`$column`, 0.0) >= 0", s"$column is non-negative", hint = hint)
-  }
+    : CheckWithLastConstraintFilterable =
+    ColumnName.sanitizeForSql(column) match {
+      case Right(c) =>
+        // coalescing column to not count NULL values as non-compliant
+        satisfies(s"COALESCE($c, 0.0) >= 0", s"$column is non-negative", hint = hint)
+      case Left(e) => throw e
+    }
 
   /**
     * Creates a constraint that asserts that a column contains no negative values
@@ -682,10 +686,13 @@ case class Check(
     * @param column Column to run the assertion on
     * @return
     */
-  def isPositive(column: String): CheckWithLastConstraintFilterable = {
-    // coalescing column to not count NULL values as non-compliant
-    satisfies(s"COALESCE(`$column`, 1.0) > 0", s"$column is positive")
-  }
+  def isPositive(column: String): CheckWithLastConstraintFilterable =
+    ColumnName.sanitizeForSql(column) match {
+      case Right(c) =>
+        // coalescing column to not count NULL values as non-compliant
+        satisfies(s"COALESCE($c, 1.0) > 0", s"$column is positive")
+      case Left(e) => throw e
+    }
 
   /**
     *
@@ -700,11 +707,16 @@ case class Check(
       columnA: String,
       columnB: String,
       hint: Option[String] = None)
-    : CheckWithLastConstraintFilterable = {
-
-    satisfies(s"`$columnA` < `$columnB`", s"$columnA is less than $columnB",
-      hint = hint)
-  }
+    : CheckWithLastConstraintFilterable =
+    (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB)) match {
+      case (Right(cA), Right(cB)) =>
+        satisfies(s"$cA < $cB", s"$columnA is less than $columnB", hint = hint)
+      case (Left(e), _) => throw e
+      case (_, Left(e)) => throw e
+      case (Left(eA), Left(eB)) => throw new IllegalArgumentException(
+        s"Cannot sanitize two column names:\n$eA\n$eB"
+      )
+    }
 
   /**
     * Asserts that, in each row, the value of columnA is less than or equal to the value of columnB
@@ -718,11 +730,16 @@ case class Check(
       columnA: String,
       columnB: String,
       hint: Option[String] = None)
-    : CheckWithLastConstraintFilterable = {
-
-    satisfies(s"`$columnA` <= `$columnB`", s"$columnA is less than or equal to $columnB",
-      hint = hint)
-  }
+    : CheckWithLastConstraintFilterable =
+    (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB)) match {
+      case (Right(cA), Right(cB)) =>
+      satisfies(s"$cA <= $cB", s"$columnA is less than or equal to $columnB", hint = hint)
+      case (Left(e), _) => throw e
+      case (_, Left(e)) => throw e
+      case (Left(eA), Left(eB)) => throw new IllegalArgumentException(
+        s"Cannot sanitize two column names:\n$eA\n$eB"
+      )
+    }
 
   /**
     * Asserts that, in each row, the value of columnA is greater than the value of columnB
@@ -736,11 +753,16 @@ case class Check(
       columnA: String,
       columnB: String,
       hint: Option[String] = None)
-    : CheckWithLastConstraintFilterable = {
-
-    satisfies(s"`$columnA` > `$columnB`", s"$columnA is greater than $columnB",
-      hint = hint)
-  }
+    : CheckWithLastConstraintFilterable =
+    (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB)) match {
+      case (Right(cA), Right(cB)) =>
+        satisfies(s"$cA > $cB", s"$columnA is greater than $columnB",hint = hint)
+      case (Left(e), _) => throw e
+      case (_, Left(e)) => throw e
+      case (Left(eA), Left(eB)) => throw new IllegalArgumentException(
+        s"Cannot sanitize two column names:\n$eA\n$eB"
+      )
+    }
 
   /**
     * Asserts that, in each row, the value of columnA is greather than or equal to the value of
@@ -755,11 +777,16 @@ case class Check(
       columnA: String,
       columnB: String,
       hint: Option[String] = None)
-    : CheckWithLastConstraintFilterable = {
-
-    satisfies(s"`$columnA` >= `$columnB`", s"$columnA is greater than or equal to $columnB",
-      hint = hint)
-  }
+    : CheckWithLastConstraintFilterable =
+    (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB)) match {
+      case (Right(cA), Right(cB)) =>
+      satisfies(s"$cA > $cB", s"$columnA is greater than or equal to $columnB",hint = hint)
+      case (Left(e), _) => throw e
+      case (_, Left(e)) => throw e
+      case (Left(eA), Left(eB)) => throw new IllegalArgumentException(
+        s"Cannot sanitize two column names:\n$eA\n$eB"
+      )
+    }
 
   // We can't use default values here as you can't combine default values and overloading in Scala
   /**
@@ -830,15 +857,19 @@ case class Check(
       allowedValues: Array[String],
       assertion: Double => Boolean,
       hint: Option[String])
-    : CheckWithLastConstraintFilterable = {
+    : CheckWithLastConstraintFilterable =
+    ColumnName.sanitizeForSql(column) match {
+      case Right(c) =>
+        val valueList = allowedValues
+          .map { _.replaceAll("'", "''") }
+          .mkString("'", "','", "'")
 
-    val valueList = allowedValues
-      .map { _.replaceAll("'", "''") }
-      .mkString("'", "','", "'")
+        val predicate = s"$c IS NULL OR $c IN ($valueList)"
+        satisfies(predicate, s"$column contained in ${allowedValues.mkString(",")}", assertion,
+          hint)
 
-    val predicate = s"`$column` IS NULL OR `$column` IN ($valueList)"
-    satisfies(predicate, s"$column contained in ${allowedValues.mkString(",")}", assertion, hint)
-  }
+      case Left(e) => throw e
+    }
 
   /**
     * Asserts that the non-null values in a numeric column fall into the predefined interval
@@ -858,16 +889,17 @@ case class Check(
       includeLowerBound: Boolean = true,
       includeUpperBound: Boolean = true,
       hint: Option[String] = None)
-    : CheckWithLastConstraintFilterable = {
+    : CheckWithLastConstraintFilterable =
+    ColumnName.sanitizeForSql(column) match {
+      case Right(c) =>
+        val leftOperand = if (includeLowerBound) ">=" else ">"
+        val rightOperand = if (includeUpperBound) "<=" else "<"
+        val predicate =
+          s"$c IS NULL OR ($c $leftOperand $lowerBound AND $c $rightOperand $upperBound)"
+        satisfies(predicate, s"$column between $lowerBound and $upperBound", hint = hint)
 
-    val leftOperand = if (includeLowerBound) ">=" else ">"
-    val rightOperand = if (includeUpperBound) "<=" else "<"
-
-    val predicate = s"`$column` IS NULL OR " +
-      s"(`$column` $leftOperand $lowerBound AND `$column` $rightOperand $upperBound)"
-
-    satisfies(predicate, s"$column between $lowerBound and $upperBound", hint = hint)
-  }
+      case Left(e) => throw e
+    }
 
   /**
     * Evaluate this check on computed metrics
