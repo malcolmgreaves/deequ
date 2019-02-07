@@ -20,8 +20,10 @@ import com.amazon.deequ.analyzers.{DataTypeInstances, Histogram}
 import com.amazon.deequ.constraints.Constraint.complianceConstraint
 import com.amazon.deequ.metrics.DistributionValue
 import com.amazon.deequ.profiles.ColumnProfile
+import com.amazon.deequ.schema.ColumnName
 import com.amazon.deequ.suggestions.ConstraintSuggestion
 import org.apache.commons.lang3.StringEscapeUtils
+
 import scala.math.BigDecimal.RoundingMode
 
 /** If we see a categorical range for most values in a column, we suggest an IS IN (...)
@@ -50,51 +52,54 @@ case class FractionalCategoricalRangeRule(targetDataCoverageFraction: Double = 0
     }
   }
 
-  override def candidate(profile: ColumnProfile, numRecords: Long): ConstraintSuggestion = {
+  override def candidate(profile: ColumnProfile, numRecords: Long): ConstraintSuggestion =
+    ColumnName.sanitizeForSql(profile.column) {
+      case Left(c) =>
+        val topCategories = getTopCategoriesForFractionalDataCoverage(profile,
+          targetDataCoverageFraction)
+        val ratioSums = topCategories.map { case (_, categoryValue) => categoryValue.ratio }.sum
 
-    val topCategories = getTopCategoriesForFractionalDataCoverage(profile,
-      targetDataCoverageFraction)
-    val ratioSums = topCategories.map { case (_, categoryValue) => categoryValue.ratio }.sum
+        val valuesByPopularity = topCategories.toArray
+          .filterNot { case (key, _) => key == Histogram.NullFieldReplacement }
+          .sortBy { case (_, value) => value.absolute }
+          .reverse
 
-    val valuesByPopularity = topCategories.toArray
-      .filterNot { case (key, _) => key == Histogram.NullFieldReplacement }
-      .sortBy { case (_, value) => value.absolute }
-      .reverse
+        val categoriesSql = valuesByPopularity
+          // the character "'" can be contained in category names
+          .map { case (key, _) => key.replace("'", "''") }
+          .mkString("'", "', '", "'")
 
-    val categoriesSql = valuesByPopularity
-      // the character "'" can be contained in category names
-      .map { case (key, _) => key.replace("'", "''") }
-      .mkString("'", "', '", "'")
+        val categoriesCode = valuesByPopularity
+          .map { case (key, _) => StringEscapeUtils.escapeJava(key) }
+          .mkString(""""""", """", """", """"""")
 
-    val categoriesCode = valuesByPopularity
-      .map { case (key, _) => StringEscapeUtils.escapeJava(key) }
-      .mkString(""""""", """", """", """"""")
+        val p = ratioSums
+        val n = numRecords
+        val z = 1.96
 
-    val p = ratioSums
-    val n = numRecords
-    val z = 1.96
+        // TODO this needs to be more robust for p's close to 0 or 1
+        val targetCompliance = BigDecimal(p - z * math.sqrt(p * (1 - p) / n))
+          .setScale(2, RoundingMode.DOWN).toDouble
 
-    // TODO this needs to be more robust for p's close to 0 or 1
-    val targetCompliance = BigDecimal(p - z * math.sqrt(p * (1 - p) / n))
-      .setScale(2, RoundingMode.DOWN).toDouble
+        val description = s"'${profile.column}' has value range $categoriesSql for at least " +
+          s"${targetCompliance * 100}% of values"
+        val columnCondition = s"$c IN ($categoriesSql)"
+        val hint = s"It should be above $targetCompliance!"
+        val constraint = complianceConstraint(description, columnCondition, _ >= targetCompliance,
+          hint = Some(hint))
 
-    val description = s"'${profile.column}' has value range $categoriesSql for at least " +
-      s"${targetCompliance * 100}% of values"
-    val columnCondition = s"`${profile.column}` IN ($categoriesSql)"
-    val hint = s"It should be above $targetCompliance!"
-    val constraint = complianceConstraint(description, columnCondition, _ >= targetCompliance,
-      hint = Some(hint))
+        ConstraintSuggestion(
+          constraint,
+          profile.column,
+          "Compliance: " + ratioSums.toString,
+          description,
+          this,
+          s""".isContainedIn("${profile.column}", Array($categoriesCode),
+             | _ >= $targetCompliance, Some("$hint"))""".stripMargin.replaceAll("\n", "")
+        )
 
-    ConstraintSuggestion(
-      constraint,
-      profile.column,
-      "Compliance: " + ratioSums.toString,
-      description,
-      this,
-      s""".isContainedIn("${profile.column}", Array($categoriesCode),
-         | _ >= $targetCompliance, Some("$hint"))""".stripMargin.replaceAll("\n", "")
-    )
-  }
+      case Right(e) => throw e
+    }
 
   private[this] def getTopCategoriesForFractionalDataCoverage(
       columnProfile: ColumnProfile,

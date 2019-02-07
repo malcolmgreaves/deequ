@@ -132,7 +132,6 @@ case class FrequenciesAndNumRows(frequencies: DataFrame, numRows: Long)
       .filterNot { _ == COUNT_COL }
 
     val projectionAfterMerge = {
-
       val (sanitizedColumns, errors) = columns
         .map { ColumnName.sanitizeForSql }
         .foldLeft((Seq.empty[String], Seq.empty[SanitizeError])) {
@@ -147,14 +146,12 @@ case class FrequenciesAndNumRows(frequencies: DataFrame, numRows: Long)
             errors.mkString("\n")
         )
       } else {
-        sanitizedColumns.map { c =>
-          coalesce(col(s"this.$c"), col(s"other.$c")).as(c)
-        } ++
-        Seq(
-          (zeroIfNull(s"this.$COUNT_COL") + zeroIfNull(s"other.$COUNT_COL")).as(COUNT_COL)
-        )
+        sanitizedColumns.map { c => coalesce(col(s"this.$c"), col(s"other.$c")).as(c) }
       }
-    }
+    } ++
+      Seq(
+        (zeroIfNull(s"this.$COUNT_COL") + zeroIfNull(s"other.$COUNT_COL")).as(COUNT_COL)
+      )
 
     /* Null-safe join condition over equality on grouping columns */
     val joinCondition = columns.tail
