@@ -733,7 +733,7 @@ case class Check(
     : CheckWithLastConstraintFilterable =
     (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB)) match {
       case (Right(cA), Right(cB)) =>
-      satisfies(s"$cA <= $cB", s"$columnA is less than or equal to $columnB", hint = hint)
+        satisfies(s"$cA <= $cB", s"$columnA is less than or equal to $columnB", hint = hint)
       case (Left(e), _) => throw e
       case (_, Left(e)) => throw e
       case (Left(eA), Left(eB)) => throw new IllegalArgumentException(
@@ -780,7 +780,7 @@ case class Check(
     : CheckWithLastConstraintFilterable =
     (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB)) match {
       case (Right(cA), Right(cB)) =>
-      satisfies(s"$cA > $cB", s"$columnA is greater than or equal to $columnB",hint = hint)
+        satisfies(s"$cA > $cB", s"$columnA is greater than or equal to $columnB",hint = hint)
       case (Left(e), _) => throw e
       case (_, Left(e)) => throw e
       case (Left(eA), Left(eB)) => throw new IllegalArgumentException(
@@ -894,8 +894,10 @@ case class Check(
       case Right(c) =>
         val leftOperand = if (includeLowerBound) ">=" else ">"
         val rightOperand = if (includeUpperBound) "<=" else "<"
+
         val predicate =
           s"$c IS NULL OR ($c $leftOperand $lowerBound AND $c $rightOperand $upperBound)"
+
         satisfies(predicate, s"$column between $lowerBound and $upperBound", hint = hint)
 
       case Left(e) => throw e
