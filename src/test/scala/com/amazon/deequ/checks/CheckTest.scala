@@ -554,10 +554,23 @@ class CheckTest extends WordSpec with Matchers with SparkContextSpec with Fixtur
     val valuesGoodColumnNames =
       Seq((1.0, 10.0), (2.0, 20.0), (3.0, 30.0), (4.0, 40.0), (5.0, 50.0))
 
+    val valuesBadColumnNames = Seq(
+      ItemPair(1.0, 10.0),
+      ItemPair(2.0, 20.0),
+      ItemPair(3.0, 30.0),
+      ItemPair(4.0, 40.0),
+      ItemPair(5.0, 50.0)
+    )
+
     "check greater than" in withSparkSession { sparkSession =>
       testCheckOnData(
         sparkSession.createDataFrame(valuesGoodColumnNames),
         Check(CheckLevel.Error, "good >").isGreaterThan("_2", "_1")
+      )
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesBadColumnNames),
+        Check(CheckLevel.Error, "bad >")
+          .isGreaterThan(badColumnName2, badColumnName1)
       )
     }
 
@@ -566,6 +579,11 @@ class CheckTest extends WordSpec with Matchers with SparkContextSpec with Fixtur
         sparkSession.createDataFrame(valuesGoodColumnNames),
         Check(CheckLevel.Error, "good <").isLessThan("_1", "_2")
       )
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesBadColumnNames),
+        Check(CheckLevel.Error, "bad <")
+          .isLessThan(badColumnName1, badColumnName2)
+      )
     }
 
     "check greater than or equal to" in withSparkSession { sparkSession =>
@@ -573,12 +591,22 @@ class CheckTest extends WordSpec with Matchers with SparkContextSpec with Fixtur
         sparkSession.createDataFrame(valuesGoodColumnNames),
         Check(CheckLevel.Error, "good >=").isGreaterThanOrEqualTo("_2", "_1")
       )
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesBadColumnNames),
+        Check(CheckLevel.Error, "bad >=")
+          .isGreaterThanOrEqualTo(badColumnName2, badColumnName1)
+      )
     }
 
     "check less than or equal to" in withSparkSession { sparkSession =>
       testCheckOnData(
         sparkSession.createDataFrame(valuesGoodColumnNames),
         Check(CheckLevel.Error, "good <=").isLessThanOrEqualTo("_1", "_2")
+      )
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesBadColumnNames),
+        Check(CheckLevel.Error, "bad <=")
+          .isLessThanOrEqualTo(badColumnName1, badColumnName2)
       )
     }
   }
@@ -838,5 +866,9 @@ object CheckTest extends WordSpec with Matchers {
   val badColumnName: String = "[this column]:has a handful of problematic chars"
   case class ItemStr(`[this column]:has a handful of problematic chars`: String)
   case class ItemDbl(`[this column]:has a handful of problematic chars`: Option[Double])
+
+  val badColumnName1 = "][ bad column 1"
+  val badColumnName2 = "][ bad column 2"
+  case class ItemPair(`][ bad column 1`: Double, `][ bad column 2`: Double)
 
 }
