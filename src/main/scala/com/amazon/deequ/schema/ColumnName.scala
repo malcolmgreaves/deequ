@@ -18,13 +18,15 @@ package com.amazon.deequ.schema
 
 object ColumnName {
 
+  type Sanitized = Either[SanitizeError, String]
+
   /**
     * Sanitizes the input column name by ensuring that it is escaped with backticks.
     *
     * The resulting String is the escaped input column name, which is safe to use in
     * any Spark SQL statement.
     */
-  def sanitizeForSql(columnName: String): Either[SanitizeError, String] =
+  def sanitizeForSql(columnName: String): Sanitized =
     if (columnName == null || columnName.isEmpty || columnName.trim.isEmpty) {
       Left(EmptyColumn)
 
