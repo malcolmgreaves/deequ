@@ -54,6 +54,30 @@ object ColumnName {
       }
     }
 
+  /**
+    * Obtains the `String` value if `Right` or throws the `SanitizeError` if `Left`.
+    **/
+  def getOrThrow(x: Sanitized): String = x match {
+    case Left(e) => throw e
+    case Right(str) => str
+  }
+
+  /**
+    * Obtains the `String` pair if both are `Right`, otherwise throws the error(s).
+    *
+    * If only one of the sanitizations failed, then a `SanitizeError` type is thrown.
+    * If both fail, then an `IllegalArgumentException` is thrown and its message contains
+    * both of the `SanitizeError` messages.
+    * */
+  def getOrThrow(x: (Sanitized, Sanitized)): (String,String) = x match {
+    case (Right(cA), Right(cB)) => (cA, cB)
+    case (Left(eA), Left(eB)) => throw new IllegalArgumentException(
+      s"Cannot sanitize two column names:\n$eA\n$eB"
+    )
+    case (Left(e), _) => throw e
+    case (_, Left(e)) => throw e
+  }
+
 }
 
 sealed abstract class SanitizeError(message: String) extends Exception(message)

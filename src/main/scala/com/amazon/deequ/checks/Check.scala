@@ -704,7 +704,7 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
-    val (cA,cB) = Check.getOrThrow(
+    val (cA,cB) = ColumnName.getOrThrow(
       (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB))
     )
     satisfies(s"$cA < $cB", s"$columnA is less than $columnB", hint = hint)
@@ -724,7 +724,7 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
-    val (cA, cB) = Check.getOrThrow(
+    val (cA, cB) = ColumnName.getOrThrow(
       (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB))
     )
     satisfies(s"$cA <= $cB", s"$columnA is less than or equal to $columnB", hint = hint)
@@ -744,7 +744,7 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
-    val (cA, cB) = Check.getOrThrow(
+    val (cA, cB) = ColumnName.getOrThrow(
       (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB))
     )
     satisfies(s"$cA > $cB", s"$columnA is greater than $columnB", hint = hint)
@@ -765,7 +765,7 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
-    val (cA, cB) = Check.getOrThrow(
+    val (cA, cB) = ColumnName.getOrThrow(
       (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB))
     )
     satisfies(s"$cA >= $cB", s"$columnA is greater than or equal to $columnB",hint = hint)
@@ -842,12 +842,13 @@ case class Check(
       hint: Option[String])
     : CheckWithLastConstraintFilterable = {
 
+    val c = ColumnName.getOrThrow(ColumnName.sanitizeForSql(column))
 
     val valueList = allowedValues
       .map { _.replaceAll("'", "''") }
       .mkString("'", "','", "'")
 
-    val predicate = s"`$column` IS NULL OR `$column` IN ($valueList)"
+    val predicate = s"$c IS NULL OR $c IN ($valueList)"
     satisfies(predicate, s"$column contained in ${allowedValues.mkString(",")}", assertion, hint)
   }
 
@@ -871,11 +872,13 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
+    val c = ColumnName.getOrThrow(ColumnName.sanitizeForSql(column))
+
     val leftOperand = if (includeLowerBound) ">=" else ">"
     val rightOperand = if (includeUpperBound) "<=" else "<"
 
-    val predicate = s"`$column` IS NULL OR " +
-      s"(`$column` $leftOperand $lowerBound AND `$column` $rightOperand $upperBound)"
+    val predicate =
+      s"$c IS NULL OR ($c $leftOperand $lowerBound AND $c $rightOperand $upperBound)"
 
     satisfies(predicate, s"$column between $lowerBound and $upperBound", hint = hint)
   }
@@ -990,24 +993,6 @@ object Check {
       DataPoint(testDateTime, Some(currentMetricValue)))
 
     detectedAnomalies.anomalies.isEmpty
-  }
-
-  import ColumnName.Sanitized
-
-  /** Obtains the String value if Right or throws the SanitizeError if Left. */
-  private[checks] def getOrThrow(x: Sanitized): String = x match {
-    case Left(e) => throw e
-    case Right(str) => str
-  }
-
-  /** Obtains the String pair if both are Right, otherwise throws the error(s). */
-  private[checks] def getOrThrow(x: (Sanitized, Sanitized)): (String,String) = x match {
-    case (Right(cA), Right(cB)) => (cA, cB)
-    case (Left(eA), Left(eB)) => throw new IllegalArgumentException(
-      s"Cannot sanitize two column names:\n$eA\n$eB"
-    )
-    case (Left(e), _) => throw e
-    case (_, Left(e)) => throw e
   }
 
 }
