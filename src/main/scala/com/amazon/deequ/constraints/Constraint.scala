@@ -112,6 +112,8 @@ object Constraint {
       hint: Option[String] = None)
     : Constraint = {
 
+    // TODO: sanitize column !!
+
     val histogram = Histogram(column, binningUdf, maxBins)
 
     val constraint = AnalysisBasedConstraint[FrequenciesAndNumRows, Distribution, Distribution](
@@ -138,6 +140,8 @@ object Constraint {
       hint: Option[String] = None)
     : Constraint = {
 
+    // TODO: sanitize column !!
+
     val histogram = Histogram(column, binningUdf, maxBins)
 
     val constraint = AnalysisBasedConstraint[FrequenciesAndNumRows, Distribution, Long](
@@ -161,6 +165,8 @@ object Constraint {
       hint: Option[String] = None)
     : Constraint = {
 
+    // TODO: sanitize column !!
+
     val completeness = Completeness(column, where)
 
     val constraint = AnalysisBasedConstraint[NumMatchesAndCount, Double, Double](
@@ -183,6 +189,8 @@ object Constraint {
       hint: Option[String] = None)
     : Constraint = {
 
+    // TODO: sanitize column !!
+
     val constraint = AnalysisBasedConstraint[S, Double, Double](analyzer, anomalyAssertion,
       hint = hint)
 
@@ -202,6 +210,8 @@ object Constraint {
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : Constraint = {
+
+    // TODO: sanitize column !!
 
     val uniqueness = Uniqueness(columns)
 
@@ -225,6 +235,8 @@ object Constraint {
       hint: Option[String] = None)
     : Constraint = {
 
+    // TODO: sanitize column !!
+
     val distinctness = Distinctness(columns)
 
     val constraint = AnalysisBasedConstraint[FrequenciesAndNumRows, Double, Double](
@@ -246,6 +258,8 @@ object Constraint {
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : Constraint = {
+
+    // TODO: sanitize column !!
 
     val uniqueValueRatio = UniqueValueRatio(columns)
     val constraint = AnalysisBasedConstraint[FrequenciesAndNumRows, Double, Double](
@@ -269,6 +283,8 @@ object Constraint {
       where: Option[String] = None,
       hint: Option[String] = None)
     : Constraint = {
+
+    // TODO: sanitize column !!
 
     val compliance = Compliance(name, column, where)
 
@@ -295,6 +311,8 @@ object Constraint {
       name: Option[String] = None,
       hint: Option[String] = None)
     : Constraint = {
+
+    // TODO: sanitize column !!
 
     val patternMatch = PatternMatch(column, pattern, where)
 
@@ -323,6 +341,8 @@ object Constraint {
       hint: Option[String] = None)
     : Constraint = {
 
+    // TODO: sanitize column !!
+
     val entropy = Entropy(column)
 
     val constraint = AnalysisBasedConstraint[FrequenciesAndNumRows, Double, Double](
@@ -346,6 +366,8 @@ object Constraint {
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : Constraint = {
+
+    // TODO: sanitize column !!
 
     val mutualInformation = MutualInformation(Seq(columnA, columnB))
 
@@ -371,6 +393,8 @@ object Constraint {
       hint: Option[String] = None)
     : Constraint = {
 
+    // TODO: sanitize column !!
+
     val approxQuantile = ApproxQuantile(column, quantile)
 
     val constraint = AnalysisBasedConstraint[ApproxQuantileState, Double, Double](
@@ -394,6 +418,8 @@ object Constraint {
       hint: Option[String] = None)
     : Constraint = {
 
+    // TODO: sanitize column !!
+
     val minimum = Minimum(column, where)
 
     val constraint = AnalysisBasedConstraint[MinState, Double, Double](minimum, assertion,
@@ -415,6 +441,8 @@ object Constraint {
       where: Option[String] = None,
       hint: Option[String] = None)
     : Constraint = {
+
+    // TODO: sanitize column !!
 
     val maximum = Maximum(column, where)
 
@@ -438,6 +466,8 @@ object Constraint {
       hint: Option[String] = None)
     : Constraint = {
 
+    // TODO: sanitize column !!
+
     val mean = Mean(column, where)
 
     val constraint = AnalysisBasedConstraint[MeanState, Double, Double](mean, assertion,
@@ -458,6 +488,8 @@ object Constraint {
       where: Option[String] = None,
       hint: Option[String] = None)
     : Constraint = {
+
+    // TODO: sanitize column !!
 
     val sum = Sum(column, where)
 
@@ -482,6 +514,8 @@ object Constraint {
       hint: Option[String] = None)
     : Constraint = {
 
+    // TODO: sanitize column !!
+
     val standardDeviation = StandardDeviation(column, where)
 
     val constraint = AnalysisBasedConstraint[StandardDeviationState, Double, Double](
@@ -503,6 +537,8 @@ object Constraint {
       where: Option[String] = None,
       hint: Option[String] = None)
     : Constraint = {
+
+    // TODO: sanitize column !!
 
     val approxCountDistinct = ApproxCountDistinct(column, where)
 
@@ -528,6 +564,8 @@ object Constraint {
       hint: Option[String] = None)
     : Constraint = {
 
+    // TODO: sanitize column !!
+
     val correlation = Correlation(columnA, columnB, where)
 
     val constraint = AnalysisBasedConstraint[CorrelationState, Double, Double](
@@ -551,6 +589,8 @@ object Constraint {
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : Constraint = {
+
+    // TODO: sanitize column !!
 
     /** Get the specified data type distribution ratio or maps to 0.0 */
     val valuePicker: Distribution => Double = {
