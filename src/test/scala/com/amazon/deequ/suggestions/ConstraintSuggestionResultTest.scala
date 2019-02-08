@@ -154,7 +154,7 @@ class ConstraintSuggestionResultTest extends WordSpec with Matchers with SparkCo
 //              |      ]
 //              |    },
 //              |    {
-//              |      "column": "att1",
+//              |      "column": "]att1[",
 //              |      "dataType": "String",
 //              |      "isDataTypeInferred": "true",
 //              |      "completeness": 1.0,
@@ -221,14 +221,14 @@ class ConstraintSuggestionResultTest extends WordSpec with Matchers with SparkCo
               |      "code_for_constraint": ".isComplete(\"att2\")"
               |    },
               |    {
-              |      "constraint_name": "CompletenessConstraint(Completeness(att1,None))",
-              |      "column_name": "att1",
+              |      "constraint_name": "CompletenessConstraint(Completeness(]att1[,None))",
+              |      "column_name": "]att1[",
               |      "current_value": "Completeness: 1.0",
-              |      "description": "'att1' is not null",
+              |      "description": "']att1[' is not null",
               |      "suggesting_rule": "CompleteIfCompleteRule()",
               |      "rule_description": "If a column is complete in the sample, we suggest a NOT
               | NULL constraint",
-              |      "code_for_constraint": ".isComplete(\"att1\")"
+              |      "code_for_constraint": ".isComplete(\"]att1[\")"
               |    },
               |    {
               |      "constraint_name": "CompletenessConstraint(Completeness(item,None))",
@@ -304,14 +304,14 @@ class ConstraintSuggestionResultTest extends WordSpec with Matchers with SparkCo
               |      "constraint_result_on_test_set": "Failure"
               |    },
               |    {
-              |      "constraint_name": "CompletenessConstraint(Completeness(att1,None))",
-              |      "column_name": "att1",
+              |      "constraint_name": "CompletenessConstraint(Completeness(]att1[,None))",
+              |      "column_name": "]att1[",
               |      "current_value": "Completeness: 1.0",
-              |      "description": "\u0027att1\u0027 is not null",
+              |      "description": "\u0027]att1[\u0027 is not null",
               |      "suggesting_rule": "CompleteIfCompleteRule()",
               |      "rule_description": "If a column is complete in the sample, we suggest a NOT
               | NULL constraint",
-              |      "code_for_constraint": ".isComplete(\"att1\")",
+              |      "code_for_constraint": ".isComplete(\"]att1[\")",
               |      "constraint_result_on_test_set": "Failure"
               |    },
               |    {
@@ -391,14 +391,14 @@ class ConstraintSuggestionResultTest extends WordSpec with Matchers with SparkCo
               |      "constraint_result_on_test_set": "Unknown"
               |    },
               |    {
-              |      "constraint_name": "CompletenessConstraint(Completeness(att1,None))",
-              |      "column_name": "att1",
+              |      "constraint_name": "CompletenessConstraint(Completeness(]att1[,None))",
+              |      "column_name": "]att1[",
               |      "current_value": "Completeness: 1.0",
-              |      "description": "\u0027att1\u0027 is not null",
+              |      "description": "\u0027]att1[\u0027 is not null",
               |      "suggesting_rule": "CompleteIfCompleteRule()",
               |      "rule_description": "If a column is complete in the sample, we suggest a NOT
               | NULL constraint",
-              |      "code_for_constraint": ".isComplete(\"att1\")",
+              |      "code_for_constraint": ".isComplete(\"]att1[\")",
               |      "constraint_result_on_test_set": "Unknown"
               |    },
               |    {
