@@ -336,8 +336,6 @@ object Preconditions {
 
 private[deequ] object Analyzers {
 
-  // NOTE: Do not introduce any spaces or Spark SQL reserved characters to these, and
-  //       other column names, without first escaping them in backticks (``).
   val COL_PREFIX = "com_amazon_deequ_dq_metrics_"
   val COUNT_COL = s"${COL_PREFIX}count"
 

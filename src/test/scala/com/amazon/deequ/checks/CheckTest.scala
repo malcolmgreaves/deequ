@@ -24,6 +24,7 @@ import com.amazon.deequ.constraints.{ConstrainableDataTypes, ConstraintStatus}
 import com.amazon.deequ.metrics.{DoubleMetric, Entity}
 import com.amazon.deequ.repository.memory.InMemoryMetricsRepository
 import com.amazon.deequ.repository.{MetricsRepository, ResultKey}
+import com.amazon.deequ.suggestions.ConstraintSuggestionRunnerTest.Item
 import com.amazon.deequ.utils.FixtureSupport
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
@@ -490,14 +491,6 @@ class CheckTest extends WordSpec with Matchers with SparkContextSpec with Fixtur
 
   "Check on column names with special characters" should {
 
-    def testWithExoticColumnName(df: DataFrame, c: Check): Unit = {
-      val r = VerificationSuite()
-        .onData(df)
-        .addCheck(c)
-        .run()
-      assert(r.status == CheckStatus.Success)
-    }
-
     val valuesStr: Seq[ItemStr] = Seq(
       ItemStr("NULL"),
       ItemStr("NULL"),
@@ -542,7 +535,7 @@ class CheckTest extends WordSpec with Matchers with SparkContextSpec with Fixtur
 
     "generate correct Spark SQL & work for isContainedIn value list variant" in
       withSparkSession { sparkSession =>
-        testWithExoticColumnName(
+        testCheckOnData(
           sparkSession.createDataFrame(valuesStr),
           isContainedValues
         )
@@ -550,11 +543,92 @@ class CheckTest extends WordSpec with Matchers with SparkContextSpec with Fixtur
 
     "generate correct Spark SQL & work for isContainedIn bounds variant" in
       withSparkSession { sparkSession =>
-        testWithExoticColumnName(
+        testCheckOnData(
           sparkSession.createDataFrame(valuesDbl),
           isContainedBounds
         )
       }
+
+    val positiveValuesDbl = valuesDbl.filter {
+      case ItemDbl(Some(x)) => x > 0.0
+      case _ => false
+    }
+
+    "work for isPositive" in withSparkSession { sparkSession =>
+      testCheckOnData(
+        sparkSession.createDataFrame(positiveValuesDbl),
+        Check(CheckLevel.Error, s"isPositive on $badColumnName").isPositive(badColumnName)
+      )
+    }
+
+    "work for isNonNegative" in withSparkSession { sparkSession =>
+      testCheckOnData(
+        sparkSession.createDataFrame(positiveValuesDbl),
+        Check(CheckLevel.Error, s"isNonNegative on $badColumnName").isNonNegative(badColumnName)
+      )
+    }
+  }
+
+  "Checks for two-columned DataFrames" should {
+
+    val valuesGoodColumnNames =
+      Seq((1.0, 10.0), (2.0, 20.0), (3.0, 30.0), (4.0, 40.0), (5.0, 50.0))
+
+    val valuesBadColumnNames = Seq(
+      ItemPair(1.0, 10.0),
+      ItemPair(2.0, 20.0),
+      ItemPair(3.0, 30.0),
+      ItemPair(4.0, 40.0),
+      ItemPair(5.0, 50.0)
+    )
+
+    "check greater than" in withSparkSession { sparkSession =>
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesGoodColumnNames),
+        Check(CheckLevel.Error, "good >").isGreaterThan("_2", "_1")
+      )
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesBadColumnNames),
+        Check(CheckLevel.Error, "bad >")
+          .isGreaterThan(badColumnName2, badColumnName1)
+      )
+    }
+
+    "check less than" in withSparkSession { sparkSession =>
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesGoodColumnNames),
+        Check(CheckLevel.Error, "good <").isLessThan("_1", "_2")
+      )
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesBadColumnNames),
+        Check(CheckLevel.Error, "bad <")
+          .isLessThan(badColumnName1, badColumnName2)
+      )
+    }
+
+    "check greater than or equal to" in withSparkSession { sparkSession =>
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesGoodColumnNames),
+        Check(CheckLevel.Error, "good >=").isGreaterThanOrEqualTo("_2", "_1")
+      )
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesBadColumnNames),
+        Check(CheckLevel.Error, "bad >=")
+          .isGreaterThanOrEqualTo(badColumnName2, badColumnName1)
+      )
+    }
+
+    "check less than or equal to" in withSparkSession { sparkSession =>
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesGoodColumnNames),
+        Check(CheckLevel.Error, "good <=").isLessThanOrEqualTo("_1", "_2")
+      )
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesBadColumnNames),
+        Check(CheckLevel.Error, "bad <=")
+          .isLessThanOrEqualTo(badColumnName1, badColumnName2)
+      )
+    }
   }
 
   "Check isNewestPointNonAnomalous" should {
@@ -801,8 +875,20 @@ object CheckTest extends WordSpec with Matchers {
       dataType, sparkSession)
   }
 
-  val badColumnName: String = "[this column]:has a handful of problematic chars"
+  def testCheckOnData(df: DataFrame, c: Check): Unit = {
+    val r = VerificationSuite()
+      .onData(df)
+      .addCheck(c)
+      .run()
+    assert(r.status == CheckStatus.Success)
+  }
 
+  val badColumnName: String = "[this column]:has a handful of problematic chars"
   case class ItemStr(`[this column]:has a handful of problematic chars`: String)
   case class ItemDbl(`[this column]:has a handful of problematic chars`: Option[Double])
+
+  val badColumnName1 = "][ bad column 1"
+  val badColumnName2 = "][ bad column 2"
+  case class ItemPair(`][ bad column 1`: Double, `][ bad column 2`: Double)
+
 }

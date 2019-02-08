@@ -44,38 +44,37 @@ case class CategoricalRangeRule() extends ConstraintRule[ColumnProfile] {
     }
   }
 
-  override def candidate(profile: ColumnProfile, numRecords: Long): ConstraintSuggestion =
-    ColumnName.sanitizeForSql(profile.column) match {
-      case Right(c) =>
-        val valuesByPopularity = profile.histogram.get.values.toArray
-          .filterNot { case (key, _) => key == Histogram.NullFieldReplacement }
-          .sortBy { case (_, value) => value.absolute }
-          .reverse
+  override def candidate(profile: ColumnProfile, numRecords: Long): ConstraintSuggestion = {
 
-        val categoriesSql = valuesByPopularity
-          // the character "'" can be contained in category names
-          .map { case (key, _) => key.replace("'", "''") }
-          .mkString("'", "', '", "'")
+    val c = ColumnName.getOrThrow(ColumnName.sanitizeForSql(profile.column))
 
-        val categoriesCode = valuesByPopularity
-          .map { case (key, _) => StringEscapeUtils.escapeJava(key) }
-          .mkString(""""""", """", """", """"""")
+    val valuesByPopularity = profile.histogram.get.values.toArray
+      .filterNot { case (key, _) => key == Histogram.NullFieldReplacement }
+      .sortBy { case (_, value) => value.absolute }
+      .reverse
 
-        val description = s"'${profile.column}' has value range $categoriesSql"
-        val columnCondition = s"$c IN ($categoriesSql)"
-        val constraint = complianceConstraint(description, columnCondition, Check.IsOne)
+    val categoriesSql = valuesByPopularity
+      // the character "'" can be contained in category names
+      .map { case (key, _) => key.replace("'", "''") }
+      .mkString("'", "', '", "'")
 
-        ConstraintSuggestion(
-          constraint,
-          profile.column,
-          "Compliance: 1",
-          description,
-          this,
-          s""".isContainedIn("${profile.column}", Array($categoriesCode))"""
-        )
+    val categoriesCode = valuesByPopularity
+      .map { case (key, _) => StringEscapeUtils.escapeJava(key) }
+      .mkString(""""""", """", """", """"""")
 
-      case Left(e) => throw e
-    }
+    val description = s"'${profile.column}' has value range $categoriesSql"
+    val columnCondition = s"$c IN ($categoriesSql)"
+    val constraint = complianceConstraint(description, columnCondition, Check.IsOne)
+
+    ConstraintSuggestion(
+      constraint,
+      profile.column,
+      "Compliance: 1",
+      description,
+      this,
+      s""".isContainedIn("${profile.column}", Array($categoriesCode))"""
+    )
+  }
 
   override val ruleDescription: String = "If we see a categorical range for a " +
     "column, we suggest an IS IN (...) constraint"

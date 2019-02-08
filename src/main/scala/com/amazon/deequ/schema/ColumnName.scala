@@ -27,8 +27,8 @@ object ColumnName {
     * any Spark SQL statement.
     */
   def sanitizeForSql(columnName: String): Sanitized =
-    if (columnName == null || columnName.isEmpty || columnName.trim.isEmpty) {
-      Left(EmptyColumn)
+    if (columnName == null) {
+      Left(NullColumn)
 
     } else {
       val (prefix, suffix, insideColumnName) = {
@@ -54,10 +54,34 @@ object ColumnName {
       }
     }
 
+  /**
+    * Obtains the `String` value if `Right` or throws the `SanitizeError` if `Left`.
+    **/
+  def getOrThrow(x: Sanitized): String = x match {
+    case Left(e) => throw e
+    case Right(str) => str
+  }
+
+  /**
+    * Obtains the `String` pair if both are `Right`, otherwise throws the error(s).
+    *
+    * If only one of the sanitizations failed, then a `SanitizeError` type is thrown.
+    * If both fail, then an `IllegalArgumentException` is thrown and its message contains
+    * both of the `SanitizeError` messages.
+    * */
+  def getOrThrow(x: (Sanitized, Sanitized)): (String,String) = x match {
+    case (Right(cA), Right(cB)) => (cA, cB)
+    case (Left(eA), Left(eB)) => throw new IllegalArgumentException(
+      s"Cannot sanitize two column names:\n$eA\n$eB"
+    )
+    case (Left(e), _) => throw e
+    case (_, Left(e)) => throw e
+  }
+
 }
 
 sealed abstract class SanitizeError(message: String) extends Exception(message)
 case class ColumnNameHasBackticks(column: String) extends SanitizeError(
   s"Column name ($column) has backticks (non-sanitizing), which is not allowed in Spark SQL."
 )
-case object EmptyColumn extends SanitizeError("Empty column name is invalid")
+case object NullColumn extends SanitizeError("null is not a valid column name value")

@@ -52,54 +52,53 @@ case class FractionalCategoricalRangeRule(targetDataCoverageFraction: Double = 0
     }
   }
 
-  override def candidate(profile: ColumnProfile, numRecords: Long): ConstraintSuggestion =
-    ColumnName.sanitizeForSql(profile.column) match {
-      case Right(c) =>
-        val topCategories = getTopCategoriesForFractionalDataCoverage(profile,
-          targetDataCoverageFraction)
-        val ratioSums = topCategories.map { case (_, categoryValue) => categoryValue.ratio }.sum
+  override def candidate(profile: ColumnProfile, numRecords: Long): ConstraintSuggestion = {
 
-        val valuesByPopularity = topCategories.toArray
-          .filterNot { case (key, _) => key == Histogram.NullFieldReplacement }
-          .sortBy { case (_, value) => value.absolute }
-          .reverse
+    val c = ColumnName.getOrThrow(ColumnName.sanitizeForSql(profile.column))
 
-        val categoriesSql = valuesByPopularity
-          // the character "'" can be contained in category names
-          .map { case (key, _) => key.replace("'", "''") }
-          .mkString("'", "', '", "'")
+    val topCategories = getTopCategoriesForFractionalDataCoverage(profile,
+      targetDataCoverageFraction)
+    val ratioSums = topCategories.map { case (_, categoryValue) => categoryValue.ratio }.sum
 
-        val categoriesCode = valuesByPopularity
-          .map { case (key, _) => StringEscapeUtils.escapeJava(key) }
-          .mkString(""""""", """", """", """"""")
+    val valuesByPopularity = topCategories.toArray
+      .filterNot { case (key, _) => key == Histogram.NullFieldReplacement }
+      .sortBy { case (_, value) => value.absolute }
+      .reverse
 
-        val p = ratioSums
-        val n = numRecords
-        val z = 1.96
+    val categoriesSql = valuesByPopularity
+      // the character "'" can be contained in category names
+      .map { case (key, _) => key.replace("'", "''") }
+      .mkString("'", "', '", "'")
 
-        // TODO this needs to be more robust for p's close to 0 or 1
-        val targetCompliance = BigDecimal(p - z * math.sqrt(p * (1 - p) / n))
-          .setScale(2, RoundingMode.DOWN).toDouble
+    val categoriesCode = valuesByPopularity
+      .map { case (key, _) => StringEscapeUtils.escapeJava(key) }
+      .mkString(""""""", """", """", """"""")
 
-        val description = s"'${profile.column}' has value range $categoriesSql for at least " +
-          s"${targetCompliance * 100}% of values"
-        val columnCondition = s"$c IN ($categoriesSql)"
-        val hint = s"It should be above $targetCompliance!"
-        val constraint = complianceConstraint(description, columnCondition, _ >= targetCompliance,
-          hint = Some(hint))
+    val p = ratioSums
+    val n = numRecords
+    val z = 1.96
 
-        ConstraintSuggestion(
-          constraint,
-          profile.column,
-          "Compliance: " + ratioSums.toString,
-          description,
-          this,
-          s""".isContainedIn("${profile.column}", Array($categoriesCode),
-             | _ >= $targetCompliance, Some("$hint"))""".stripMargin.replaceAll("\n", "")
-        )
+    // TODO this needs to be more robust for p's close to 0 or 1
+    val targetCompliance = BigDecimal(p - z * math.sqrt(p * (1 - p) / n))
+      .setScale(2, RoundingMode.DOWN).toDouble
 
-      case Left(e) => throw e
-    }
+    val description = s"'${profile.column}' has value range $categoriesSql for at least " +
+      s"${targetCompliance * 100}% of values"
+    val columnCondition = s"$c IN ($categoriesSql)"
+    val hint = s"It should be above $targetCompliance!"
+    val constraint = complianceConstraint(description, columnCondition, _ >= targetCompliance,
+      hint = Some(hint))
+
+    ConstraintSuggestion(
+      constraint,
+      profile.column,
+      "Compliance: " + ratioSums.toString,
+      description,
+      this,
+      s""".isContainedIn("${profile.column}", Array($categoriesCode),
+         | _ >= $targetCompliance, Some("$hint"))""".stripMargin.replaceAll("\n", "")
+    )
+  }
 
   private[this] def getTopCategoriesForFractionalDataCoverage(
       columnProfile: ColumnProfile,

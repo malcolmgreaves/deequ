@@ -23,7 +23,7 @@ import com.amazon.deequ.metrics.DoubleMetric
 import Analyzers._
 import org.apache.spark.sql.types.StructType
 import Preconditions._
-import com.amazon.deequ.schema.{ColumnName, SanitizeError}
+import com.amazon.deequ.analyzers.runners.MetricCalculationException
 
 /** Base class for all analyzers that operate the frequencies of groups in the data */
 abstract class FrequencyBasedAnalyzer(columnsToGroupOn: Seq[String])
@@ -131,27 +131,9 @@ case class FrequenciesAndNumRows(frequencies: DataFrame, numRows: Long)
       .map { _.name }
       .filterNot { _ == COUNT_COL }
 
-    val projectionAfterMerge = {
-      val (sanitizedColumns, errors) = columns
-        .map { ColumnName.sanitizeForSql }
-        .foldLeft((Seq.empty[String], Seq.empty[SanitizeError])) {
-          case ((sanitizedColumns, errors), sanitizeResult) => sanitizeResult match {
-            case Right(c) => (sanitizedColumns :+ c, errors)
-            case Left(e) => (sanitizedColumns, errors :+ e)
-          }
-        }
-      if (errors.nonEmpty) {
-        throw new IllegalArgumentException(
-          s"Found ${errors.length} un-sanitizable column names:\n"+
-            errors.mkString("\n")
-        )
-      } else {
-        sanitizedColumns.map { c => coalesce(col(s"this.$c"), col(s"other.$c")).as(c) }
-      }
-    } ++
-      Seq(
-        (zeroIfNull(s"this.$COUNT_COL") + zeroIfNull(s"other.$COUNT_COL")).as(COUNT_COL)
-      )
+    val projectionAfterMerge =
+      columns.map { column => coalesce(col(s"this.$column"), col(s"other.$column")).as(column) } ++
+        Seq((zeroIfNull(s"this.$COUNT_COL") + zeroIfNull(s"other.$COUNT_COL")).as(COUNT_COL))
 
     /* Null-safe join condition over equality on grouping columns */
     val joinCondition = columns.tail
@@ -165,18 +147,13 @@ case class FrequenciesAndNumRows(frequencies: DataFrame, numRows: Long)
     FrequenciesAndNumRows(frequenciesSum, numRows + other.numRows)
   }
 
-  private[analyzers] def nullSafeEq(column: String): Column =
-    ColumnName.sanitizeForSql(column) match {
-      case Right(c) => col(s"this.$c") <=> col(s"other.$c")
-      case Left(e) => throw e
-    }
+  private[analyzers] def nullSafeEq(column: String): Column = {
+    col(s"this.$column") <=> col(s"other.$column")
+  }
 
-  private[analyzers] def zeroIfNull(column: String): Column =
-    ColumnName.sanitizeForSql(column) match {
-      case Right(c) => coalesce(col(c), lit(0))
-      case Left(e) => throw e
-    }
-
+  private[analyzers] def zeroIfNull(column: String): Column = {
+    coalesce(col(column), lit(0))
+  }
 }
 
 
