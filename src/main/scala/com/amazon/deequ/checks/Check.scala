@@ -25,6 +25,8 @@ import com.amazon.deequ.metrics.{Distribution, Metric}
 import com.amazon.deequ.repository.MetricsRepository
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import com.amazon.deequ.anomalydetection.HistoryUtils
+import com.amazon.deequ.schema.ColumnName
+
 import scala.util.matching.Regex
 
 object CheckLevel extends Enumeration {
@@ -702,8 +704,10 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
-    satisfies(s"$columnA < $columnB", s"$columnA is less than $columnB",
-      hint = hint)
+    val (cA,cB) = Check.getOrThrow(
+      (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB))
+    )
+    satisfies(s"$cA < $cB", s"$columnA is less than $columnB", hint = hint)
   }
 
   /**
@@ -720,8 +724,10 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
-    satisfies(s"$columnA <= $columnB", s"$columnA is less than or equal to $columnB",
-      hint = hint)
+    val (cA, cB) = Check.getOrThrow(
+      (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB))
+    )
+    satisfies(s"$cA <= $cB", s"$columnA is less than or equal to $columnB", hint = hint)
   }
 
   /**
@@ -738,8 +744,10 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
-    satisfies(s"$columnA > $columnB", s"$columnA is greater than $columnB",
-      hint = hint)
+    val (cA, cB) = Check.getOrThrow(
+      (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB))
+    )
+    satisfies(s"$cA > $cB", s"$columnA is greater than $columnB", hint = hint)
   }
 
   /**
@@ -757,8 +765,10 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
-    satisfies(s"$columnA >= $columnB", s"$columnA is greater than or equal to $columnB",
-      hint = hint)
+    val (cA, cB) = Check.getOrThrow(
+      (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB))
+    )
+    satisfies(s"$cA >= $cB", s"$columnA is greater than or equal to $columnB",hint = hint)
   }
 
   // We can't use default values here as you can't combine default values and overloading in Scala
@@ -981,4 +991,23 @@ object Check {
 
     detectedAnomalies.anomalies.isEmpty
   }
+
+  import ColumnName.Sanitized
+
+  /** Obtains the String value if Right or throws the SanitizeError if Left. */
+  private[checks] def getOrThrow(x: Sanitized): String = x match {
+    case Left(e) => throw e
+    case Right(str) => str
+  }
+
+  /** Obtains the String pair if both are Right, otherwise throws the error(s). */
+  private[checks] def getOrThrow(x: (Sanitized, Sanitized)): (String,String) = x match {
+    case (Right(cA), Right(cB)) => (cA, cB)
+    case (Left(eA), Left(eB)) => throw new IllegalArgumentException(
+      s"Cannot sanitize two column names:\n$eA\n$eB"
+    )
+    case (Left(e), _) => throw e
+    case (_, Left(e)) => throw e
+  }
+
 }
