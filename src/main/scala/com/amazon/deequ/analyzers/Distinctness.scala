@@ -36,6 +36,9 @@ case class Distinctness(columns: Seq[String])
 
 object Distinctness {
   def apply(column: String): Distinctness = {
+
+    // TODO: sanitize column !!
+
     new Distinctness(column :: Nil)
   }
 }

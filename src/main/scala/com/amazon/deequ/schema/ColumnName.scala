@@ -26,6 +26,7 @@ object ColumnName {
     * The resulting String is the escaped input column name, which is safe to use in
     * any Spark SQL statement.
     */
+  @inline
   def sanitizeForSql(columnName: String): Sanitized =
     if (columnName == null) {
       Left(NullColumn)
@@ -57,6 +58,7 @@ object ColumnName {
   /**
     * Obtains the `String` value if `Right` or throws the `SanitizeError` if `Left`.
     **/
+  @inline
   def getOrThrow(x: Sanitized): String = x match {
     case Left(e) => throw e
     case Right(str) => str
@@ -69,6 +71,7 @@ object ColumnName {
     * If both fail, then an `IllegalArgumentException` is thrown and its message contains
     * both of the `SanitizeError` messages.
     * */
+  @inline
   def getOrThrow(x: (Sanitized, Sanitized)): (String,String) = x match {
     case (Right(cA), Right(cB)) => (cA, cB)
     case (Left(eA), Left(eB)) => throw new IllegalArgumentException(
@@ -77,6 +80,14 @@ object ColumnName {
     case (Left(e), _) => throw e
     case (_, Left(e)) => throw e
   }
+
+  /**
+    * Alias for `sanitizeForSql | getOrThrow`.
+    * @throws SanitizeError iff the column name cannot be sanitized.
+    */
+  @inline
+  def sanitize(columnName: String): String =
+    getOrThrow(sanitizeForSql(columnName))
 
 }
 
