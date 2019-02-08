@@ -490,14 +490,6 @@ class CheckTest extends WordSpec with Matchers with SparkContextSpec with Fixtur
 
   "Check on column names with special characters" should {
 
-    def testWithExoticColumnName(df: DataFrame, c: Check): Unit = {
-      val r = VerificationSuite()
-        .onData(df)
-        .addCheck(c)
-        .run()
-      assert(r.status == CheckStatus.Success)
-    }
-
     val valuesStr: Seq[ItemStr] = Seq(
       ItemStr("NULL"),
       ItemStr("NULL"),
@@ -542,7 +534,7 @@ class CheckTest extends WordSpec with Matchers with SparkContextSpec with Fixtur
 
     "generate correct Spark SQL & work for isContainedIn value list variant" in
       withSparkSession { sparkSession =>
-        testWithExoticColumnName(
+        testCheckOnData(
           sparkSession.createDataFrame(valuesStr),
           isContainedValues
         )
@@ -550,7 +542,7 @@ class CheckTest extends WordSpec with Matchers with SparkContextSpec with Fixtur
 
     "generate correct Spark SQL & work for isContainedIn bounds variant" in
       withSparkSession { sparkSession =>
-        testWithExoticColumnName(
+        testCheckOnData(
           sparkSession.createDataFrame(valuesDbl),
           isContainedBounds
         )
@@ -801,8 +793,16 @@ object CheckTest extends WordSpec with Matchers {
       dataType, sparkSession)
   }
 
-  val badColumnName: String = "[this column]:has a handful of problematic chars"
+  def testCheckOnData(df: DataFrame, c: Check): Unit = {
+    val r = VerificationSuite()
+      .onData(df)
+      .addCheck(c)
+      .run()
+    assert(r.status == CheckStatus.Success)
+  }
 
+  val badColumnName: String = "[this column]:has a handful of problematic chars"
   case class ItemStr(`[this column]:has a handful of problematic chars`: String)
   case class ItemDbl(`[this column]:has a handful of problematic chars`: Option[Double])
+
 }
