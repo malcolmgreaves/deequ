@@ -674,8 +674,9 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
+    val c = ColumnName.getOrThrow(ColumnName.sanitizeForSql(column))
     // coalescing column to not count NULL values as non-compliant
-    satisfies(s"COALESCE($column, 0.0) >= 0", s"$column is non-negative", hint = hint)
+    satisfies(s"COALESCE($c, 0.0) >= 0", s"$column is non-negative", hint = hint)
   }
 
   /**
@@ -685,8 +686,9 @@ case class Check(
     * @return
     */
   def isPositive(column: String): CheckWithLastConstraintFilterable = {
+    val c = ColumnName.getOrThrow(ColumnName.sanitizeForSql(column))
     // coalescing column to not count NULL values as non-compliant
-    satisfies(s"COALESCE($column, 1.0) > 0", s"$column is positive")
+    satisfies(s"COALESCE($c, 1.0) > 0", s"$column is positive")
   }
 
   /**
