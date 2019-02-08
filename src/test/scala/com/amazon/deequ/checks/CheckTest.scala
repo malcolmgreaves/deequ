@@ -549,6 +549,40 @@ class CheckTest extends WordSpec with Matchers with SparkContextSpec with Fixtur
       }
   }
 
+  "Checks for two-columned DataFrames" should {
+
+    val valuesGoodColumnNames =
+      Seq((1.0, 10.0), (2.0, 20.0), (3.0, 30.0), (4.0, 40.0), (5.0, 50.0))
+
+    "check greater than" in withSparkSession { sparkSession =>
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesGoodColumnNames),
+        Check(CheckLevel.Error, "good >").isGreaterThan("_2", "_1")
+      )
+    }
+
+    "check less than" in withSparkSession { sparkSession =>
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesGoodColumnNames),
+        Check(CheckLevel.Error, "good <").isLessThan("_1", "_2")
+      )
+    }
+
+    "check greater than or equal to" in withSparkSession { sparkSession =>
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesGoodColumnNames),
+        Check(CheckLevel.Error, "good >=").isGreaterThanOrEqualTo("_2", "_1")
+      )
+    }
+
+    "check less than or equal to" in withSparkSession { sparkSession =>
+      testCheckOnData(
+        sparkSession.createDataFrame(valuesGoodColumnNames),
+        Check(CheckLevel.Error, "good <=").isLessThanOrEqualTo("_1", "_2")
+      )
+    }
+  }
+
   "Check isNewestPointNonAnomalous" should {
 
     "return the correct check status for anomaly detection for different analyzers" in
