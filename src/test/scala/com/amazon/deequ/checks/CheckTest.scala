@@ -24,6 +24,7 @@ import com.amazon.deequ.constraints.{ConstrainableDataTypes, ConstraintStatus}
 import com.amazon.deequ.metrics.{DoubleMetric, Entity}
 import com.amazon.deequ.repository.memory.InMemoryMetricsRepository
 import com.amazon.deequ.repository.{MetricsRepository, ResultKey}
+import com.amazon.deequ.suggestions.ConstraintSuggestionRunnerTest.Item
 import com.amazon.deequ.utils.FixtureSupport
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
@@ -547,6 +548,25 @@ class CheckTest extends WordSpec with Matchers with SparkContextSpec with Fixtur
           isContainedBounds
         )
       }
+
+    val positiveValuesDbl = valuesDbl.filter {
+      case ItemDbl(Some(x)) => x > 0.0
+      case _ => false
+    }
+
+    "work for isPositive" in withSparkSession { sparkSession =>
+      testCheckOnData(
+        sparkSession.createDataFrame(positiveValuesDbl),
+        Check(CheckLevel.Error, s"isPositive on $badColumnName").isPositive(badColumnName)
+      )
+    }
+
+    "work for isNonNegative" in withSparkSession { sparkSession =>
+      testCheckOnData(
+        sparkSession.createDataFrame(positiveValuesDbl),
+        Check(CheckLevel.Error, s"isNonNegative on $badColumnName").isNonNegative(badColumnName)
+      )
+    }
   }
 
   "Checks for two-columned DataFrames" should {
