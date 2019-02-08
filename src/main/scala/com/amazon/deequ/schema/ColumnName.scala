@@ -27,8 +27,8 @@ object ColumnName {
     * any Spark SQL statement.
     */
   def sanitizeForSql(columnName: String): Sanitized =
-    if (columnName == null || columnName.isEmpty || columnName.trim.isEmpty) {
-      Left(EmptyColumn)
+    if (columnName == null) {
+      Left(NullColumn)
 
     } else {
       val (prefix, suffix, insideColumnName) = {
@@ -84,4 +84,4 @@ sealed abstract class SanitizeError(message: String) extends Exception(message)
 case class ColumnNameHasBackticks(column: String) extends SanitizeError(
   s"Column name ($column) has backticks (non-sanitizing), which is not allowed in Spark SQL."
 )
-case object EmptyColumn extends SanitizeError("Empty column name is invalid")
+case object NullColumn extends SanitizeError("null is not a valid column name value")

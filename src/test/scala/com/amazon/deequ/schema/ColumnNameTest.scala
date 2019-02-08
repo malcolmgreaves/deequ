@@ -62,12 +62,10 @@ class ColumnNameTest extends WordSpec with Matchers {
       }
     }
 
-    "fail to sanitize an empty column name" in {
-      Seq("", "     ", null).foreach {c =>
-        ColumnName.sanitizeForSql(c) match {
-          case Left(EmptyColumn)  => ()
-          case x => fail(s"Expecting EmptyColumn, not: $x")
-        }
+    "fail to sanitize a null column name" in {
+      ColumnName.sanitizeForSql(null) match {
+        case Left(NullColumn)  => ()
+        case x => fail(s"Expecting EmptyColumn, not: $x")
       }
     }
   }
