@@ -41,7 +41,7 @@ object DeequFunctions {
   }
 
   /** Standard deviation with state */
-  def stateful_stddev_pop(column: String): Column = {
+  def stateful_stddev_pop(column: SafeColumn): Column = {
     stateful_stddev_pop(Column(column))
   }
 
@@ -51,7 +51,7 @@ object DeequFunctions {
   }
 
   /** Approximate number of distinct values with state via HLL's */
-  def stateful_approx_count_distinct(column: String): Column = {
+  def stateful_approx_count_distinct(column: SafeColumn): Column = {
     stateful_approx_count_distinct(Column(column))
   }
 

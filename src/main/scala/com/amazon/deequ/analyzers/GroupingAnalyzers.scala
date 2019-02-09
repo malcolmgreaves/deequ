@@ -23,7 +23,7 @@ import Analyzers._
 import org.apache.spark.sql.types.StructType
 import Preconditions._
 import com.amazon.deequ.analyzers.runners.MetricCalculationException
-import com.amazon.deequ.schema.ColumnName
+import com.amazon.deequ.schema.{ ColumnName, SafeColumn }
 
 /** Base class for all analyzers that operate the frequencies of groups in the data */
 abstract class FrequencyBasedAnalyzer(unsanitizedColumnsToGroupOn: Seq[String])
@@ -93,7 +93,7 @@ abstract class ScanShareableFrequencyBasedAnalyzer(
   unsanitizedColumnsToGroupOn: Seq[String]
 ) extends FrequencyBasedAnalyzer(unsanitizedColumnsToGroupOn) {
 
-  def aggregationFunctions(numRows: Long): Seq[Column]
+  def aggregationFunctions(numRows: Long): Seq[SafeColumn]
 
   override def computeMetricFrom(
     state: Option[FrequenciesAndNumRows]
@@ -187,12 +187,12 @@ case class FrequenciesAndNumRows(frequencies: DataFrame, numRows: Long)
   }
 
   /** NOTE: Always call with SANITIZED column name values! */
-  private[analyzers] def nullSafeEq(column: String): Column = {
+  private[analyzers] def nullSafeEq(column: SafeColumn): SafeColumn = {
     col(s"this.$column") <=> col(s"other.$column")
   }
 
   /** NOTE: Always call with SANITIZED column name values! */
-  private[analyzers] def zeroIfNull(column: String): Column = {
+  private[analyzers] def zeroIfNull(column: SafeColumn): SafeColumn = {
     coalesce(col(column), lit(0))
   }
 }

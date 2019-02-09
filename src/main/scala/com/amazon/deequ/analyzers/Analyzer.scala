@@ -22,6 +22,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Column, DataFrame, Row}
 import com.amazon.deequ.analyzers.runners._
+import com.amazon.deequ.schema.SafeColumn
 
 import scala.language.existentials
 import scala.util.{Failure, Success}
@@ -297,14 +298,14 @@ object Preconditions {
   }
 
   /** At least one column is specified */
-  def atLeastOne(columns: Seq[String]): StructType => Unit = { _ =>
+  def atLeastOne(columns: Seq[SafeColumn]): StructType => Unit = { _ =>
     if (columns.isEmpty) {
       throw new NoColumnsSpecifiedException("At least one column needs to be specified!")
     }
   }
 
   /** At least one column is specified */
-  def exactlyNColumns(columns: Seq[String], n: Int): StructType => Unit = { _ =>
+  def exactlyNColumns(columns: Seq[SafeColumn], n: Int): StructType => Unit = { _ =>
     if (columns.size != n) {
       throw new NumberOfSpecifiedColumnsException(s"$n columns have to be specified! " +
         s"Currently, columns contains only ${columns.size} column(s): ${columns.mkString(",")}!")
@@ -312,14 +313,14 @@ object Preconditions {
   }
 
   /** Specified column exists in the data */
-  def hasColumn(column: String): StructType => Unit = { schema =>
+  def hasColumn(column: SafeColumn): StructType => Unit = { schema =>
     if (!schema.fieldNames.contains(column)) {
       throw new NoSuchColumnException(s"Input data does not include column $column!")
     }
   }
 
   /** Specified column has a numeric type */
-  def isNumeric(column: String): StructType => Unit = { schema =>
+  def isNumeric(column: SafeColumn): StructType => Unit = { schema =>
     val columnDataType = schema(column).dataType
     val hasNumericType = columnDataType match {
       case ByteType | ShortType | IntegerType | LongType | FloatType |
@@ -378,7 +379,7 @@ private[deequ] object Analyzers {
     }
   }
 
-  def entityFrom(columns: Seq[String]): Entity.Value = {
+  def entityFrom(columns: Seq[SafeColumn]): Entity.Value = {
     if (columns.size == 1) Entity.Column else Entity.Mutlicolumn
   }
 

@@ -34,7 +34,7 @@ import scala.util.matching.Regex
   * @param pattern    The regular expression to check for
   * @param where      Additional filter to apply before the analyzer is run.
   */
-case class PatternMatch(column: String, pattern: Regex, where: Option[String] = None)
+case class PatternMatch(column: Column, pattern: Regex, where: Option[String] = None)
   extends StandardScanShareableAnalyzer[NumMatchesAndCount]("PatternMatch", column) {
 
   override def fromAggregationResult(result: Row, offset: Int): Option[NumMatchesAndCount] = {

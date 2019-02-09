@@ -22,7 +22,7 @@ import com.google.gson.{GsonBuilder, JsonArray, JsonObject, JsonPrimitive}
 
 /* Profiling results for the columns which will be given to the constraint suggestion engine */
 abstract class ColumnProfile {
-  def column: String
+  def column: SafeColumn
   def completeness: Double
   def approximateNumDistinctValues: Long
   def dataType: DataTypeInstances.Value
@@ -32,7 +32,7 @@ abstract class ColumnProfile {
 }
 
 case class StandardColumnProfile(
-    column: String,
+    column: Column,
     completeness: Double,
     approximateNumDistinctValues: Long,
     dataType: DataTypeInstances.Value,
@@ -42,7 +42,7 @@ case class StandardColumnProfile(
   extends ColumnProfile
 
 case class NumericColumnProfile(
-    column: String,
+    column: Column,
     completeness: Double,
     approximateNumDistinctValues: Long,
     dataType: DataTypeInstances.Value,

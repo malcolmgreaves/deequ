@@ -34,7 +34,7 @@ case class Distribution(values: Map[String, DistributionValue], numberOfBins: Lo
   }
 }
 
-case class HistogramMetric(column: String, value: Try[Distribution]) extends Metric[Distribution] {
+case class HistogramMetric(column: Column, value: Try[Distribution]) extends Metric[Distribution] {
   val entity: Entity.Value = Entity.Column
   val instance: String = column
   val name = "Histogram"

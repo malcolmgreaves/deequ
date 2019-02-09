@@ -39,7 +39,7 @@ import scala.util.{Failure, Try}
   *                      always returns the dictinct value count.
   */
 case class Histogram(
-    column: String,
+    column: Column,
     binningUdf: Option[UserDefinedFunction] = None,
     maxDetailBins: Integer = Histogram.MaximumAllowedDetailBins)
   extends Analyzer[FrequenciesAndNumRows, HistogramMetric] {

@@ -33,7 +33,7 @@ private[deequ] case class GenericColumnStatistics(
     approximateNumDistincts: Map[String, Long],
     completenesses: Map[String, Double]) {
 
-  def typeOf(column: String): DataTypeInstances.Value = {
+  def typeOf(column: SafeColumn): DataTypeInstances.Value = {
     val inferredAndKnown = inferredTypes ++ knownTypes
     inferredAndKnown(column)
   }
@@ -339,7 +339,7 @@ object ColumnProfiler {
   }
 
   private[this] def extractGenericStatistics(
-      columns: Seq[String],
+      columns: Seq[SafeColumn],
       schema: StructType,
       results: AnalyzerContext)
     : GenericColumnStatistics = {
@@ -397,7 +397,7 @@ object ColumnProfiler {
 
 
   private[this] def castNumericStringColumns(
-      columns: Seq[String],
+      columns: Seq[SafeColumn],
       originalData: DataFrame,
       genericStatistics: GenericColumnStatistics)
     : DataFrame = {
@@ -615,7 +615,7 @@ object ColumnProfiler {
   }
 
   private[this] def createProfiles(
-      columns: Seq[String],
+      columns: Seq[SafeColumn],
       genericStats: GenericColumnStatistics,
       numericStats: NumericColumnStatistics,
       categoricalStats: CategoricalColumnStatistics)

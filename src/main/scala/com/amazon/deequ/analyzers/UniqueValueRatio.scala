@@ -22,7 +22,7 @@ import org.apache.spark.sql.{Column, Row}
 import org.apache.spark.sql.functions.{col, count, lit, sum}
 import org.apache.spark.sql.types.DoubleType
 
-case class UniqueValueRatio(columns: Seq[String])
+case class UniqueValueRatio(columns: Seq[SafeColumn])
   extends ScanShareableFrequencyBasedAnalyzer("UniqueValueRatio", columns) {
 
   override def aggregationFunctions(numRows: Long): Seq[Column] = {
@@ -38,7 +38,7 @@ case class UniqueValueRatio(columns: Seq[String])
 }
 
 object UniqueValueRatio {
-  def apply(column: String): UniqueValueRatio = {
+  def apply(column: SafeColumn): UniqueValueRatio = {
     new UniqueValueRatio(column :: Nil)
   }
 }

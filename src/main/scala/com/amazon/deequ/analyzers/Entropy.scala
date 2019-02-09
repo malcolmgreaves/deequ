@@ -25,7 +25,7 @@ import org.apache.spark.sql.functions.{col, sum, udf}
   * distribution over values in a column, it describes how many bits are required to identify a
   * value.
   */
-case class Entropy(column: String)
+case class Entropy(column: SafeColumn)
   extends ScanShareableFrequencyBasedAnalyzer("Entropy", column :: Nil) {
 
   override def aggregationFunctions(numRows: Long): Seq[Column] = {

@@ -150,7 +150,7 @@ object DataTypeHistogram {
 }
 
 case class DataType(
-    column: String,
+    column: Column,
     where: Option[String] = None)
   extends ScanShareableAnalyzer[DataTypeHistogram, HistogramMetric] {
 

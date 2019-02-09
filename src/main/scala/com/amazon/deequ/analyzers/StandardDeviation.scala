@@ -44,7 +44,7 @@ case class StandardDeviationState(
   }
 }
 
-case class StandardDeviation(column: String, where: Option[String] = None)
+case class StandardDeviation(column: Column, where: Option[String] = None)
   extends StandardScanShareableAnalyzer[StandardDeviationState]("StandardDeviation", column) {
 
   override def aggregationFunctions(): Seq[Column] = {

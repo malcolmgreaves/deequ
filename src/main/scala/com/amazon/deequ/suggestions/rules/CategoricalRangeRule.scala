@@ -20,7 +20,7 @@ import com.amazon.deequ.analyzers.{DataTypeInstances, Histogram}
 import com.amazon.deequ.checks.Check
 import com.amazon.deequ.constraints.Constraint.complianceConstraint
 import com.amazon.deequ.profiles.ColumnProfile
-import com.amazon.deequ.schema.ColumnName
+import com.amazon.deequ.schema.{ ColumnName, SafeColumn }
 import com.amazon.deequ.suggestions.ConstraintSuggestion
 import org.apache.commons.lang3.StringEscapeUtils
 

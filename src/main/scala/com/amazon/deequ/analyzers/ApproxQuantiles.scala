@@ -36,7 +36,7 @@ import scala.util.{Failure, Success}
   * @param relativeError Relative target precision to achieve in the quantile computation.
   *                      Must be in the interval [0, 1].
   */
-case class ApproxQuantiles(column: String, quantiles: Seq[Double], relativeError: Double = 0.01)
+case class ApproxQuantiles(column: Column, quantiles: Seq[Double], relativeError: Double = 0.01)
   extends ScanShareableAnalyzer[ApproxQuantileState, KeyedDoubleMetric] {
 
   val PARAM_CHECKS: StructType => Unit = { _ =>

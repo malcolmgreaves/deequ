@@ -23,7 +23,7 @@ import org.apache.spark.sql.types.DoubleType
 
 /** Uniqueness is the fraction of unique values of a column(s), i.e.,
   * values that occur exactly once. */
-case class Uniqueness(columns: Seq[String])
+case class Uniqueness(columns: Seq[SafeColumn])
   extends ScanShareableFrequencyBasedAnalyzer("Uniqueness", columns) {
 
   override def aggregationFunctions(numRows: Long): Seq[Column] = {
@@ -32,7 +32,7 @@ case class Uniqueness(columns: Seq[String])
 }
 
 object Uniqueness {
-  def apply(column: String): Uniqueness = {
+  def apply(column: SafeColumn): Uniqueness = {
     new Uniqueness(column :: Nil)
   }
 }

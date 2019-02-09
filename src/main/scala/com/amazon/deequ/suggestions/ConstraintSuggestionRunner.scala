@@ -193,7 +193,7 @@ class ConstraintSuggestionRunner {
   private[this] def applyRules(
       constraintRules: Seq[ConstraintRule[ColumnProfile]],
       profiles: ColumnProfiles,
-      columns: Seq[String])
+      columns: Seq[SafeColumn])
     : Seq[ConstraintSuggestion] = {
 
     columns

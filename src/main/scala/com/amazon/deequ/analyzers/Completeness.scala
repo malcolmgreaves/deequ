@@ -21,9 +21,10 @@ import org.apache.spark.sql.functions.sum
 import org.apache.spark.sql.types.{IntegerType, StructType}
 import Analyzers._
 import org.apache.spark.sql.{Column, Row}
+import com.amazon.deequ.schema.SafeColumn
 
 /** Completeness is the fraction of non-null values in a column of a DataFrame. */
-case class Completeness(column: String, where: Option[String] = None) extends
+case class Completeness(column: SafeColumn, where: Option[String] = None) extends
   StandardScanShareableAnalyzer[NumMatchesAndCount]("Completeness", column) {
 
   override def fromAggregationResult(result: Row, offset: Int): Option[NumMatchesAndCount] = {
@@ -33,7 +34,7 @@ case class Completeness(column: String, where: Option[String] = None) extends
     }
   }
 
-  override def aggregationFunctions(): Seq[Column] = {
+  override def aggregationFunctions(): Seq[SafeColumn] = {
 
     val summation = sum(conditionalSelection(column, where).isNotNull.cast(IntegerType))
 

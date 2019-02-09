@@ -33,7 +33,7 @@ case class MinState(minValue: Double) extends DoubleValuedState[MinState] {
   }
 }
 
-case class Minimum(column: String, where: Option[String] = None)
+case class Minimum(column: Column, where: Option[String] = None)
   extends StandardScanShareableAnalyzer[MinState]("Minimum", column) {
 
   override def aggregationFunctions(): Seq[Column] = {

@@ -17,21 +17,8 @@ package com.amazon.deequ.schema
 
 object ColumnName {
 
-  import com.softwaremill.tagging._
-
-  /** Marker for Column type. */
-  sealed abstract class C
-
-  /** A sanitized column name: safe to use in a Spark SQL statement. */
-  type Column = String @@ C
-
-  /** Type constructor for Column: only way to make a Column instance. */
-  @inline
-  private[this] def newColumn(s: String): Column =
-    s.asInstanceOf[Column]
-
   /** A sanitization result: either an error or a sanitized `Column` instance. */
-  type Sanitized = Either[SanitizeError, Column]
+  type Sanitized = Either[SanitizeError, SafeColumn]
 
   /**
     * Sanitizes the input column name by ensuring that it is escaped with backticks.
@@ -72,7 +59,7 @@ object ColumnName {
     * Obtains the `String` value if `Right` or throws the `SanitizeError` if `Left`.
     **/
   @inline
-  def getOrThrow(x: Sanitized): Column = x match {
+  def getOrThrow(x: Sanitized): SafeColumn = x match {
     case Left(er) => throw er
     case Right(c) => c
   }
@@ -85,7 +72,7 @@ object ColumnName {
     * both of the `SanitizeError` messages.
     * */
   @inline
-  def getOrThrow(x: (Sanitized, Sanitized)): (Column, Column) = x match {
+  def getOrThrow(x: (Sanitized, Sanitized)): (SafeColumn, SafeColumn) = x match {
     case (Right(cA), Right(cB)) => (cA, cB)
     case (Left(eA), Left(eB)) =>
       throw new IllegalArgumentException(
@@ -101,13 +88,13 @@ object ColumnName {
     * @throws SanitizeError iff the column name cannot be sanitized.
     */
   @inline
-  def sanitize(columnName: String): Column =
+  def sanitize(columnName: String): SafeColumn =
     getOrThrow(sanitizeForSql(columnName))
 
 }
 
 sealed abstract class SanitizeError(message: String) extends Exception(message)
-case class ColumnNameHasBackticks(column: String)
+case class ColumnNameHasBackticks(column: SafeColumn)
     extends SanitizeError(
       s"Column name ($column) has backticks (non-sanitizing), which is not allowed in Spark SQL."
     )

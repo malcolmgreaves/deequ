@@ -46,7 +46,7 @@ case class ApproxQuantileState(percentileDigest: PercentileDigest)
   * @param relativeError Relative target precision to achieve in the quantile computation.
   *                      Must be in the interval [0, 1].
   */
-case class ApproxQuantile(column: String, quantile: Double, relativeError: Double = 0.01)
+case class ApproxQuantile(column: Column, quantile: Double, relativeError: Double = 0.01)
   extends ScanShareableAnalyzer[ApproxQuantileState, DoubleMetric] {
 
   val PARAM_CHECKS: StructType => Unit = { _ =>

@@ -33,7 +33,7 @@ case class MaxState(maxValue: Double) extends DoubleValuedState[MaxState] {
   }
 }
 
-case class Maximum(column: String, where: Option[String] = None)
+case class Maximum(column: Column, where: Option[String] = None)
   extends StandardScanShareableAnalyzer[MaxState]("Maximum", column) {
 
   override def aggregationFunctions(): Seq[Column] = {

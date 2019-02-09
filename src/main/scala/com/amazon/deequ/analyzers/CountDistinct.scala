@@ -21,7 +21,7 @@ import org.apache.spark.sql.{Column, Row}
 import org.apache.spark.sql.functions.count
 import Analyzers._
 
-case class CountDistinct(columns: Seq[String])
+case class CountDistinct(columns: Seq[SafeColumn])
   extends ScanShareableFrequencyBasedAnalyzer("CountDistinct", columns) {
 
   override def aggregationFunctions(numRows: Long): Seq[Column] = {
@@ -34,7 +34,7 @@ case class CountDistinct(columns: Seq[String])
 }
 
 object CountDistinct {
-  def apply(column: String): CountDistinct = {
+  def apply(column: SafeColumn): CountDistinct = {
     new CountDistinct(column :: Nil)
   }
 }

@@ -19,6 +19,7 @@ package com.amazon.deequ.constraints
 import com.amazon.deequ.analyzers._
 import com.amazon.deequ.metrics.{Distribution, Metric}
 import org.apache.spark.sql.expressions.UserDefinedFunction
+import com.amazon.deequ.schema.SafeColumn
 
 import scala.util.matching.Regex
 
@@ -105,7 +106,7 @@ object Constraint {
     * @param hint A hint to provide additional context why a constraint could have failed
     */
   def histogramConstraint(
-      column: String,
+      column: SafeColumn,
       assertion: Distribution => Boolean,
       binningUdf: Option[UserDefinedFunction] = None,
       maxBins: Integer = Histogram.MaximumAllowedDetailBins,
@@ -133,7 +134,7 @@ object Constraint {
     * @param hint A hint to provide additional context why a constraint could have failed
     */
   def histogramBinConstraint(
-      column: String,
+      column: SafeColumn,
       assertion: Long => Boolean,
       binningUdf: Option[UserDefinedFunction] = None,
       maxBins: Integer = Histogram.MaximumAllowedDetailBins,
@@ -159,7 +160,7 @@ object Constraint {
     * @param hint A hint to provide additional context why a constraint could have failed
     */
   def completenessConstraint(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       where: Option[String] = None,
       hint: Option[String] = None)
@@ -206,7 +207,7 @@ object Constraint {
     * @param hint A hint to provide additional context why a constraint could have failed
     */
   def uniquenessConstraint(
-      columns: Seq[String],
+      columns: Seq[SafeColumn],
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : Constraint = {
@@ -230,7 +231,7 @@ object Constraint {
     * @param hint A hint to provide additional context why a constraint could have failed
     */
   def distinctnessConstraint(
-      columns: Seq[String],
+      columns: Seq[SafeColumn],
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : Constraint = {
@@ -254,7 +255,7 @@ object Constraint {
     * @param hint A hint to provide additional context why a constraint could have failed
     */
   def uniqueValueRatioConstraint(
-      columns: Seq[String],
+      columns: Seq[SafeColumn],
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : Constraint = {
@@ -278,7 +279,7 @@ object Constraint {
     */
   def complianceConstraint(
       name: String,
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       where: Option[String] = None,
       hint: Option[String] = None)
@@ -304,7 +305,7 @@ object Constraint {
     * @param hint    A hint to provide additional context why a constraint could have failed
     */
   def patternMatchConstraint(
-      column: String,
+      column: SafeColumn,
       pattern: Regex,
       assertion: Double => Boolean,
       where: Option[String] = None,
@@ -336,7 +337,7 @@ object Constraint {
     * @param hint    A hint to provide additional context why a constraint could have failed
     */
   def entropyConstraint(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : Constraint = {
@@ -387,7 +388,7 @@ object Constraint {
     * @param hint    A hint to provide additional context why a constraint could have failed
     */
   def approxQuantileConstraint(
-      column: String,
+      column: SafeColumn,
       quantile: Double,
       assertion: Double => Boolean,
       hint: Option[String] = None)
@@ -412,7 +413,7 @@ object Constraint {
     *
     */
   def minConstraint(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       where: Option[String] = None,
       hint: Option[String] = None)
@@ -436,7 +437,7 @@ object Constraint {
     * @param hint    A hint to provide additional context why a constraint could have failed
     */
   def maxConstraint(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       where: Option[String] = None,
       hint: Option[String] = None)
@@ -460,7 +461,7 @@ object Constraint {
     * @param hint    A hint to provide additional context why a constraint could have failed
     */
   def meanConstraint(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       where: Option[String] = None,
       hint: Option[String] = None)
@@ -483,7 +484,7 @@ object Constraint {
     * @param hint    A hint to provide additional context why a constraint could have failed
     */
   def sumConstraint(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       where: Option[String] = None,
       hint: Option[String] = None)
@@ -508,7 +509,7 @@ object Constraint {
     * @param hint    A hint to provide additional context why a constraint could have failed
     */
   def standardDeviationConstraint(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       where: Option[String] = None,
       hint: Option[String] = None)
@@ -532,7 +533,7 @@ object Constraint {
     * @param hint    A hint to provide additional context why a constraint could have failed
     */
   def approxCountDistinctConstraint(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       where: Option[String] = None,
       hint: Option[String] = None)
@@ -584,7 +585,7 @@ object Constraint {
     * @return
     */
   def dataTypeConstraint(
-      column: String,
+      column: SafeColumn,
       dataType: ConstrainableDataTypes.Value,
       assertion: Double => Boolean,
       hint: Option[String] = None)

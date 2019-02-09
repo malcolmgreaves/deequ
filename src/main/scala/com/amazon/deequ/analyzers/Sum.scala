@@ -33,7 +33,7 @@ case class SumState(sum: Double) extends DoubleValuedState[SumState] {
   }
 }
 
-case class Sum(column: String, where: Option[String] = None)
+case class Sum(column: Column, where: Option[String] = None)
   extends StandardScanShareableAnalyzer[SumState]("Sum", column) {
 
   override def aggregationFunctions(): Seq[Column] = {

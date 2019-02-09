@@ -33,7 +33,7 @@ case class MeanState(sum: Double, count: Long) extends DoubleValuedState[MeanSta
   }
 }
 
-case class Mean(column: String, where: Option[String] = None)
+case class Mean(column: Column, where: Option[String] = None)
   extends StandardScanShareableAnalyzer[MeanState]("Mean", column) {
 
   override def aggregationFunctions(): Seq[Column] = {

@@ -25,7 +25,7 @@ import com.amazon.deequ.metrics.{Distribution, Metric}
 import com.amazon.deequ.repository.MetricsRepository
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import com.amazon.deequ.anomalydetection.HistoryUtils
-import com.amazon.deequ.schema.ColumnName
+import com.amazon.deequ.schema.{ ColumnName, SafeColumn }
 
 import scala.util.matching.Regex
 
@@ -109,7 +109,7 @@ case class Check(
     * @param hint A hint to provide additional context why a constraint could have failed
     * @return
     */
-  def isComplete(column: String, hint: Option[String] = None): CheckWithLastConstraintFilterable = {
+  def isComplete(column: SafeColumn, hint: Option[String] = None): CheckWithLastConstraintFilterable = {
     addFilterableConstraint { filter => completenessConstraint(column, Check.IsOne, filter, hint) }
   }
 
@@ -124,7 +124,7 @@ case class Check(
     * @return
     */
   def hasCompleteness(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
@@ -138,7 +138,7 @@ case class Check(
     * @param hint A hint to provide additional context why a constraint could have failed
     * @return
     */
-  def isUnique(column: String, hint: Option[String] = None): Check = {
+  def isUnique(column: SafeColumn, hint: Option[String] = None): Check = {
     addConstraint(uniquenessConstraint(Seq(column), Check.IsOne, hint))
   }
 
@@ -150,7 +150,7 @@ case class Check(
     * @param column Columns to run the assertion on
     * @return
     */
-  def isPrimaryKey(column: String, columns: String*): Check = {
+  def isPrimaryKey(column: SafeColumn, columns: String*): Check = {
     addConstraint(uniquenessConstraint(column :: columns.toList, Check.IsOne))
   }
 
@@ -163,7 +163,7 @@ case class Check(
     * @param hint A hint to provide additional context why a constraint could have failed
     * @return
     */
-  def isPrimaryKey(column: String, hint: Option[String], columns: String*): Check = {
+  def isPrimaryKey(column: SafeColumn, hint: Option[String], columns: String*): Check = {
     addConstraint(uniquenessConstraint(column :: columns.toList, Check.IsOne, hint))
   }
 
@@ -175,7 +175,7 @@ case class Check(
     *                  Refers to the fraction of unique values
     * @return
     */
-  def hasUniqueness(columns: Seq[String], assertion: Double => Boolean): Check = {
+  def hasUniqueness(columns: Seq[SafeColumn], assertion: Double => Boolean): Check = {
     addConstraint(uniquenessConstraint(columns, assertion))
   }
 
@@ -189,7 +189,7 @@ case class Check(
     * @return
     */
   def hasUniqueness(
-      columns: Seq[String],
+      columns: Seq[SafeColumn],
       assertion: Double => Boolean,
       hint: Option[String])
     : Check = {
@@ -205,7 +205,7 @@ case class Check(
     *                  Refers to the fraction of unique values.
     * @return
     */
-  def hasUniqueness(column: String, assertion: Double => Boolean): Check = {
+  def hasUniqueness(column: SafeColumn, assertion: Double => Boolean): Check = {
     hasUniqueness(Seq(column), assertion)
   }
 
@@ -218,7 +218,7 @@ case class Check(
     * @param hint A hint to provide additional context why a constraint could have failed
     * @return
     */
-  def hasUniqueness(column: String, assertion: Double => Boolean, hint: Option[String]): Check = {
+  def hasUniqueness(column: SafeColumn, assertion: Double => Boolean, hint: Option[String]): Check = {
     hasUniqueness(Seq(column), assertion, hint)
   }
 
@@ -232,7 +232,7 @@ case class Check(
     * @return
     */
   def hasDistinctness(
-      columns: Seq[String], assertion: Double => Boolean,
+      columns: Seq[SafeColumn], assertion: Double => Boolean,
       hint: Option[String] = None)
     : Check = {
 
@@ -249,7 +249,7 @@ case class Check(
     * @return
     */
   def hasUniqueValueRatio(
-      columns: Seq[String],
+      columns: Seq[SafeColumn],
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : Check = {
@@ -269,7 +269,7 @@ case class Check(
     * @return
     */
   def hasNumberOfDistinctValues(
-      column: String,
+      column: SafeColumn,
       assertion: Long => Boolean,
       binningUdf: Option[UserDefinedFunction] = None,
       maxBins: Integer = Histogram.MaximumAllowedDetailBins,
@@ -295,7 +295,7 @@ case class Check(
     * @return
     */
   def hasHistogramValues(
-      column: String,
+      column: SafeColumn,
       assertion: Distribution => Boolean,
       binningUdf: Option[UserDefinedFunction] = None,
       maxBins: Integer = Histogram.MaximumAllowedDetailBins,
@@ -353,7 +353,7 @@ case class Check(
     * @return
     */
   def hasEntropy(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : Check = {
@@ -390,7 +390,7 @@ case class Check(
     * @param hint A hint to provide additional context why a constraint could have failed
     * @return
     */
-  def hasApproxQuantile(column: String,
+  def hasApproxQuantile(column: SafeColumn,
       quantile: Double,
       assertion: Double => Boolean,
       hint: Option[String] = None)
@@ -409,7 +409,7 @@ case class Check(
     * @return
     */
   def hasMin(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
@@ -426,7 +426,7 @@ case class Check(
     * @return
     */
   def hasMax(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
@@ -443,7 +443,7 @@ case class Check(
     * @return
     */
   def hasMean(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : Check = {
@@ -460,7 +460,7 @@ case class Check(
     * @return
     */
   def hasSum(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
@@ -477,7 +477,7 @@ case class Check(
     * @return
     */
   def hasStandardDeviation(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
@@ -495,7 +495,7 @@ case class Check(
     * @return
     */
   def hasApproxCountDistinct(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean,
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
@@ -560,7 +560,7 @@ case class Check(
     * @return
     */
   def hasPattern(
-      column: String,
+      column: SafeColumn,
       pattern: Regex,
       assertion: Double => Boolean = Check.IsOne,
       name: Option[String] = None,
@@ -581,7 +581,7 @@ case class Check(
     * @return
     */
   def containsCreditCardNumber(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean = Check.IsOne,
       hint: Option[String] = None)
     : Check = {
@@ -599,7 +599,7 @@ case class Check(
     * @return
     */
   def containsEmail(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean = Check.IsOne,
       hint: Option[String] = None)
     : Check = {
@@ -616,7 +616,7 @@ case class Check(
     * @return
     */
   def containsURL(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean = Check.IsOne,
       hint: Option[String] = None)
     : Check = {
@@ -634,7 +634,7 @@ case class Check(
     * @return
     */
   def containsSocialSecurityNumber(
-      column: String,
+      column: SafeColumn,
       assertion: Double => Boolean = Check.IsOne,
       hint: Option[String] = None)
     : Check = {
@@ -653,7 +653,7 @@ case class Check(
     * @return
     */
   def hasDataType(
-      column: String,
+      column: SafeColumn,
       dataType: ConstrainableDataTypes.Value,
       assertion: Double => Boolean = Check.IsOne,
       hint: Option[String] = None)
@@ -670,7 +670,7 @@ case class Check(
     * @return
     */
   def isNonNegative(
-      column: String,
+      column: SafeColumn,
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
@@ -685,7 +685,7 @@ case class Check(
     * @param column Column to run the assertion on
     * @return
     */
-  def isPositive(column: String): CheckWithLastConstraintFilterable = {
+  def isPositive(column: SafeColumn): CheckWithLastConstraintFilterable = {
     val c = ColumnName.getOrThrow(ColumnName.sanitizeForSql(column))
     // coalescing column to not count NULL values as non-compliant
     satisfies(s"COALESCE($c, 1.0) > 0", s"$column is positive")
@@ -782,7 +782,7 @@ case class Check(
     * @return
     */
   def isContainedIn(
-      column: String,
+      column: SafeColumn,
       allowedValues: Array[String])
     : CheckWithLastConstraintFilterable = {
 
@@ -800,7 +800,7 @@ case class Check(
     * @return
     */
   def isContainedIn(
-      column: String,
+      column: SafeColumn,
       allowedValues: Array[String],
       hint: Option[String])
     : CheckWithLastConstraintFilterable = {
@@ -818,7 +818,7 @@ case class Check(
     * @return
     */
   def isContainedIn(
-      column: String,
+      column: SafeColumn,
       allowedValues: Array[String],
       assertion: Double => Boolean)
     : CheckWithLastConstraintFilterable = {
@@ -838,7 +838,7 @@ case class Check(
     * @return
     */
   def isContainedIn(
-      column: String,
+      column: SafeColumn,
       allowedValues: Array[String],
       assertion: Double => Boolean,
       hint: Option[String])
@@ -866,7 +866,7 @@ case class Check(
     * @return
     */
   def isContainedIn(
-      column: String,
+      column: SafeColumn,
       lowerBound: Double,
       upperBound: Double,
       includeLowerBound: Boolean = true,

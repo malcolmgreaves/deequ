@@ -26,7 +26,7 @@ sealed trait ColumnDefinition {
   def name: String
   def isNullable: Boolean
 
-  def castExpression(): Column = { col(name) }
+  def castExpression(): SafeColumn = { col(name) }
 }
 
 private[this] case class StringColumnDefinition(
@@ -44,7 +44,7 @@ private[this] case class IntColumnDefinition(
     maxValue: Option[Int] = None)
   extends ColumnDefinition {
 
-  override def castExpression(): Column = { col(name).cast(IntegerType).as(name) }
+  override def castExpression(): SafeColumn = { col(name).cast(IntegerType).as(name) }
 }
 
 private[this] case class DecimalColumnDefinition(
@@ -54,7 +54,7 @@ private[this] case class DecimalColumnDefinition(
     isNullable: Boolean = true)
   extends ColumnDefinition {
 
-  override def castExpression(): Column = { col(name).cast(DecimalType(precision, scale)).as(name) }
+  override def castExpression(): SafeColumn = { col(name).cast(DecimalType(precision, scale)).as(name) }
 }
 
 private[this] case class TimestampColumnDefinition(
@@ -63,7 +63,7 @@ private[this] case class TimestampColumnDefinition(
     isNullable: Boolean = true)
   extends ColumnDefinition {
 
-  override def castExpression(): Column = {
+  override def castExpression(): SafeColumn = {
     unix_timestamp(col(name), mask).cast(TimestampType).as(name)
   }
 }
@@ -222,7 +222,7 @@ object RowLevelSchemaValidator {
     dataWithMatches.select(projection: _*).where(col(MATCHES_COLUMN))
   }
 
-  private[this] def toCNF(schema: RowLevelSchema): Column = {
+  private[this] def toCNF(schema: RowLevelSchema): SafeColumn = {
     schema.columnDefinitions.foldLeft(expr(true.toString)) { case (cnf, columnDefinition) =>
 
       var nextCnf = cnf
