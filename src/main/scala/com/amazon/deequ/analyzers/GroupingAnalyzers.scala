@@ -17,7 +17,7 @@
 package com.amazon.deequ.analyzers
 
 import org.apache.spark.sql.{Column, DataFrame, Row}
-import org.apache.spark.sql.functions.{coalesce, col, count, expr, lit}
+//import org.apache.spark.sql.functions.{coalesce, col, count, expr, lit}
 import Analyzers.COUNT_COL
 import com.amazon.deequ.metrics.DoubleMetric
 import Analyzers._

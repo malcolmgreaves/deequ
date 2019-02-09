@@ -20,7 +20,7 @@ import com.amazon.deequ.analyzers.Analyzer
 import com.amazon.deequ.metrics.Metric
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import com.amazon.deequ.analyzers.runners.AnalyzerContext
-import org.apache.spark.sql.functions._
+//import org.apache.spark.sql.functions._
 import org.apache.spark.sql.Column
 
 trait MetricsRepositoryMultipleResultsLoader {

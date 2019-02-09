@@ -19,7 +19,7 @@ package com.amazon.deequ.repository
 import java.lang.reflect.Type
 
 import com.amazon.deequ.analyzers.{State, _}
-import org.apache.spark.sql.functions._
+//import org.apache.spark.sql.functions._
 import com.amazon.deequ.metrics.{Distribution, Metric, _}
 
 import util.{Failure, Success, Try}

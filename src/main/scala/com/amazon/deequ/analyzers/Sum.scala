@@ -17,7 +17,7 @@
 package com.amazon.deequ.analyzers
 
 import com.amazon.deequ.analyzers.Preconditions.{hasColumn, isNumeric}
-import org.apache.spark.sql.functions.sum
+//import org.apache.spark.sql.functions.sum
 import org.apache.spark.sql.types.{DoubleType, StructType}
 import org.apache.spark.sql.{Column, Row}
 import Analyzers._

@@ -23,7 +23,7 @@ import com.amazon.deequ.metrics.{Distribution, DistributionValue, DoubleMetric, 
 import com.amazon.deequ.utils.AssertionUtils.TryUtils
 import com.amazon.deequ.utils.FixtureSupport
 import org.apache.spark.sql.Row
-import org.apache.spark.sql.functions.{col, expr, udf}
+//import org.apache.spark.sql.functions.{col, expr, udf}
 import org.apache.spark.sql.types._
 import org.scalatest.{Matchers, WordSpec}
 

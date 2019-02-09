@@ -19,7 +19,7 @@ package com.amazon.deequ.analyzers
 import com.amazon.deequ.analyzers.runners.{IllegalAnalyzerParameterException, MetricCalculationException}
 import com.amazon.deequ.metrics.{Distribution, DistributionValue, HistogramMetric}
 import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.functions.col
+//import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types.{StringType, StructType}
 import org.apache.spark.sql.{DataFrame, Row}
 import scala.util.{Failure, Try}
