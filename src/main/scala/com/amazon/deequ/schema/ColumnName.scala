@@ -89,6 +89,14 @@ object ColumnName {
   def sanitize(columnName: String): String =
     getOrThrow(sanitizeForSql(columnName))
 
+
+  object TypedTagExperiment {
+
+
+
+
+  }
+
 }
 
 sealed abstract class SanitizeError(message: String) extends Exception(message)
