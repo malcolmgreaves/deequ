@@ -78,6 +78,10 @@ object ColumnName {
     case (_, Left(e)) => throw e
   }
 
+  /** Alias for `sanitizeForSql ` */
+  def sanitize(columnName: String): String =
+    getOrThrow(sanitizeForSql(columnName))
+
 }
 
 sealed abstract class SanitizeError(message: String) extends Exception(message)

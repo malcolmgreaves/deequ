@@ -674,7 +674,7 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
-    val c = ColumnName.getOrThrow(ColumnName.sanitizeForSql(column))
+    val c = ColumnName.sanitize(column)
     // coalescing column to not count NULL values as non-compliant
     satisfies(s"COALESCE($c, 0.0) >= 0", s"$column is non-negative", hint = hint)
   }
@@ -686,7 +686,7 @@ case class Check(
     * @return
     */
   def isPositive(column: String): CheckWithLastConstraintFilterable = {
-    val c = ColumnName.getOrThrow(ColumnName.sanitizeForSql(column))
+    val c = ColumnName.sanitize(column)
     // coalescing column to not count NULL values as non-compliant
     satisfies(s"COALESCE($c, 1.0) > 0", s"$column is positive")
   }
@@ -844,7 +844,7 @@ case class Check(
       hint: Option[String])
     : CheckWithLastConstraintFilterable = {
 
-    val c = ColumnName.getOrThrow(ColumnName.sanitizeForSql(column))
+    val c = ColumnName.sanitize(column)
 
     val valueList = allowedValues
       .map { _.replaceAll("'", "''") }
@@ -874,7 +874,7 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
-    val c = ColumnName.getOrThrow(ColumnName.sanitizeForSql(column))
+    val c = ColumnName.sanitize(column)
 
     val leftOperand = if (includeLowerBound) ">=" else ">"
     val rightOperand = if (includeUpperBound) "<=" else "<"

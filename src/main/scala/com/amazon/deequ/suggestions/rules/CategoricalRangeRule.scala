@@ -46,7 +46,7 @@ case class CategoricalRangeRule() extends ConstraintRule[ColumnProfile] {
 
   override def candidate(profile: ColumnProfile, numRecords: Long): ConstraintSuggestion = {
 
-    val c = ColumnName.getOrThrow(ColumnName.sanitizeForSql(profile.column))
+    val c = ColumnName.sanitize(profile.column))
 
     val valuesByPopularity = profile.histogram.get.values.toArray
       .filterNot { case (key, _) => key == Histogram.NullFieldReplacement }
