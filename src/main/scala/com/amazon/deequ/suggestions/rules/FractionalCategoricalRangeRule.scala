@@ -54,7 +54,7 @@ case class FractionalCategoricalRangeRule(targetDataCoverageFraction: Double = 0
 
   override def candidate(profile: ColumnProfile, numRecords: Long): ConstraintSuggestion = {
 
-    val c = ColumnName.sanitize(profile.column))
+    val c = ColumnName.sanitize(profile.column)
 
     val topCategories = getTopCategoriesForFractionalDataCoverage(profile,
       targetDataCoverageFraction)
