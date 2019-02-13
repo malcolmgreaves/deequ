@@ -45,12 +45,24 @@ case class MutualInformation(columns: Seq[String])
         val col1 = ColumnName.sanitize(unsafeCol1)
         val col2 = ColumnName.sanitize(unsafeCol2)
 
-        // NOTE: DO NOT REMOVE THE SURROUNDING BACKTICKS (``).
-        //       THEY ENSURE THAT THE ENTIRE COLUMN NAME IS ESCAPED AND THUS SAFE FOR Spark SQL.
-        val freqCol1 = s"`__deequ_f1_$unsafeCol1`"
-        val freqCol2 = s"`__deequ_f2_$unsafeCol2`"
+        println(s"columns: $columns")
+        println(s"unsafeCol1: $unsafeCol1")
+        println(s"col1: $col1")
+        println(s"unsafeCol2: $unsafeCol2")
+        println(s"col2: $col2")
+
+        println(s"\ntheState: $theState\n")
+
+//        // NOTE: DO NOT REMOVE THE SURROUNDING BACKTICKS (``).
+//        //       THEY ENSURE THAT THE ENTIRE COLUMN NAME IS ESCAPED AND THUS SAFE FOR Spark SQL.
+//        val freqCol1 = s"`__deequ_f1_$unsafeCol1`"
+//        val freqCol2 = s"`__deequ_f2_$unsafeCol2`"
+        val freqCol1 = s"__deequ_f1_$col1"
+        val freqCol2 = s"__deequ_f2_$col2"
 
         val jointStats = theState.frequencies
+
+        jointStats.show()
 
         val marginalStats1 = jointStats
           .select(col1, COUNT_COL)
@@ -68,9 +80,10 @@ case class MutualInformation(columns: Seq[String])
             (pxy / total) * math.log((pxy / total) / ((px / total) * (py / total)))
         }
 
-        // NOTE: DO NOT REMOVE THE SURROUNDING BACKTICKS (``).
-        //       THEY ENSURE THAT THE ENTIRE COLUMN NAME IS ESCAPED AND THUS SAFE FOR Spark SQL.
-        val miCol = s"`__deequ_mi_${unsafeCol1}_$unsafeCol2`"
+//        // NOTE: DO NOT REMOVE THE SURROUNDING BACKTICKS (``).
+//        //       THEY ENSURE THAT THE ENTIRE COLUMN NAME IS ESCAPED AND THUS SAFE FOR Spark SQL.
+//        val miCol = s"`__deequ_mi_${unsafeCol1}_$unsafeCol2`"
+        val miCol = s"__deequ_mi_${col1}_$col2"
         val value = jointStats
           .join(marginalStats1, usingColumn = col1)
           .join(marginalStats2, usingColumn = col2)

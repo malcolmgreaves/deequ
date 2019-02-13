@@ -196,6 +196,15 @@ trait FixtureSupport {
     ).toDF("att1", "att2")
   }
 
+  def getDfWithConditionallyUninformativeSpecialColumns(sparkSession: SparkSession): DataFrame = {
+    import sparkSession.implicits._
+    Seq(
+      (1, 0),
+      (2, 0),
+      (3, 0)
+    ).toDF("]  att1 (", "[]att20((")
+  }
+
   def getDfWithConditionallyInformativeColumns(sparkSession: SparkSession): DataFrame = {
     import sparkSession.implicits._
     Seq(

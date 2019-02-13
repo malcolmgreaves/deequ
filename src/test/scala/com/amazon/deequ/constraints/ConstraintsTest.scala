@@ -68,9 +68,14 @@ class ConstraintsTest extends WordSpec with Matchers with SparkContextSpec with 
   "Mutual information constraint" should {
     "yield a mutual information of 0 for conditionally uninformative columns" in
       withSparkSession { sparkSession =>
-        val df = getDfWithConditionallyUninformativeColumns(sparkSession)
-        calculate(Constraint.mutualInformationConstraint("att1", "att2", _ == 0), df)
-          .status shouldBe ConstraintStatus.Success
+//        val df1 = getDfWithConditionallyUninformativeColumns(sparkSession)
+//        calculate(Constraint.mutualInformationConstraint("att1", "att2", _ == 0), df1)
+//         .status shouldBe ConstraintStatus.Success
+
+        val df2 = getDfWithConditionallyUninformativeSpecialColumns(sparkSession)
+        val x = calculate(Constraint.mutualInformationConstraint("]  att1 (", "[]att20((", _ == 0), df2)
+        print(s"CONSTRAINT RESULT:\n$x")
+        x.status shouldBe ConstraintStatus.Success
       }
   }
 
