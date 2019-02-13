@@ -101,7 +101,7 @@ class MetricsRepositoryMultipleResultsLoaderTest extends WordSpec with Matchers
               |"region":"NA", "dataset_date":$DATE_TWO}]"""
               .stripMargin.replaceAll("\n", "")
 
-          AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
+          assertSameJson(analysisResultsAsJson, expected)
         }
       }
 
@@ -141,7 +141,7 @@ class MetricsRepositoryMultipleResultsLoaderTest extends WordSpec with Matchers
 
           val expected = """[]"""
 
-          AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
+          assertSameJson(analysisResultsAsJson, expected)
         }
       }
 
@@ -224,7 +224,7 @@ class MetricsRepositoryMultipleResultsLoaderTest extends WordSpec with Matchers
               |"dataset_name":null, "dataset_version":"2.0"}]"""
               .stripMargin.replaceAll("\n", "")
 
-          AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
+          assertSameJson(analysisResultsAsJson, expected)
         }
       }
   }

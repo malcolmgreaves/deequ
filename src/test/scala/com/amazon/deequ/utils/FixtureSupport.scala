@@ -16,12 +16,15 @@
 
 package com.amazon.deequ.utils
 
+import com.amazon.deequ.repository.SimpleResultSerde
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.scalatest.Assertions
+
 import scala.util.Random
 
 
-trait FixtureSupport {
+trait FixtureSupport extends Assertions {
 
   def getDfEmpty(sparkSession: SparkSession): DataFrame = {
     import sparkSession.implicits._
@@ -227,5 +230,20 @@ trait FixtureSupport {
       .toList
       .map { index => (s"$index", random.shuffle(categories).head)}
       .toDF("]att1[", "categoricalColumn")
+  }
+
+  def assertSameJson(jsonA: String, jsonB: String): Unit = {
+    val a = SimpleResultSerde.deserialize(jsonA)
+    val b = SimpleResultSerde.deserialize(jsonB)
+
+    implicit object OrderingTestMap extends Ordering[Map[String,Any]]{
+      override def compare(x: Map[String, Any],y: Map[String, Any]): Int = {
+        val instance: Map[String,Any] => String  =
+          _.get("instance").fold("")(_.asInstanceOf[String])
+        instance(x).compareTo(instance(y))
+      }
+    }
+
+    Assertions.assert(a.sorted == b.sorted)
   }
 }

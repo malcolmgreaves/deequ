@@ -78,7 +78,7 @@ class AnalyzerContextTest extends WordSpec with Matchers with SparkContextSpec w
               |"name":"Uniqueness","value":0.25}]"""
               .stripMargin.replaceAll("\n", "")
 
-          AssertionUtils.assertSameJson(successMetricsResultsJson, expectedJson)
+          assertSameJson(successMetricsResultsJson, expectedJson)
         }
       }
 
@@ -98,7 +98,7 @@ class AnalyzerContextTest extends WordSpec with Matchers with SparkContextSpec w
               |"name":"Uniqueness","value":0.25}]"""
             .stripMargin.replaceAll("\n", "")
 
-          AssertionUtils.assertSameJson(successMetricsResultsJson, expectedJson)
+          assertSameJson(successMetricsResultsJson, expectedJson)
         }
       }
   }

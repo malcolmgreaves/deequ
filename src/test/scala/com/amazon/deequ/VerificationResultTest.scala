@@ -84,7 +84,7 @@ class VerificationResultTest extends WordSpec with Matchers with SparkContextSpe
               |"name":"Uniqueness","value":0.25}]"""
               .stripMargin.replaceAll("\n", "")
 
-          AssertionUtils.assertSameJson(successMetricsResultsJson, expectedJson)
+          assertSameJson(successMetricsResultsJson, expectedJson)
         }
       }
 
@@ -104,7 +104,7 @@ class VerificationResultTest extends WordSpec with Matchers with SparkContextSpe
               |"name":"Uniqueness","value":0.25}]"""
               .stripMargin.replaceAll("\n", "")
 
-          AssertionUtils.assertSameJson(successMetricsResultsJson, expectedJson)
+          assertSameJson(successMetricsResultsJson, expectedJson)
         }
       }
   }
@@ -164,7 +164,7 @@ class VerificationResultTest extends WordSpec with Matchers with SparkContextSpe
               | requirement! Should be smaller than 0.8!"}]"""
               .stripMargin.replaceAll("\n", "")
 
-          AssertionUtils.assertSameJson(checkResultsAsJson, expectedJson)
+          assertSameJson(checkResultsAsJson, expectedJson)
         }
       }
   }

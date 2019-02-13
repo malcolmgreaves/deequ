@@ -233,6 +233,6 @@ class SimpleResultSerdeTest extends WordSpec with Matchers with SparkContextSpec
           |"instance":"]att1[,att2","name":"MutualInformation","value":0.5623351446188083}]"""
             .stripMargin.replaceAll("\n", "")
 
-      AssertionUtils.assertSameJson(sucessMetricsResultJson, expected)
+      assertSameJson(sucessMetricsResultJson, expected)
     }
 }

@@ -79,7 +79,7 @@ class AnalysisResultTest extends WordSpec with Matchers with SparkContextSpec wi
               |"region":"EU", "dataset_date":$DATE_ONE}]"""
               .stripMargin.replaceAll("\n", "")
 
-          AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
+          assertSameJson(analysisResultsAsJson, expected)
         }
     }
 
@@ -127,7 +127,7 @@ class AnalysisResultTest extends WordSpec with Matchers with SparkContextSpec wi
               |"region":"EU", "dataset_date":$DATE_ONE}]"""
               .stripMargin.replaceAll("\n", "")
 
-          AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
+          assertSameJson(analysisResultsAsJson, expected)
         }
       }
 
@@ -174,7 +174,7 @@ class AnalysisResultTest extends WordSpec with Matchers with SparkContextSpec wi
             |"region":"EU", "dataset_date":$DATE_ONE}]"""
             .stripMargin.replaceAll("\n", "")
 
-        AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
+        assertSameJson(analysisResultsAsJson, expected)
       }
     }
 
@@ -221,7 +221,7 @@ class AnalysisResultTest extends WordSpec with Matchers with SparkContextSpec wi
             |"name_2":"EU", "dataset_date":$DATE_ONE}]"""
             .stripMargin.replaceAll("\n", "")
 
-        AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
+        assertSameJson(analysisResultsAsJson, expected)
       }
     }
 
@@ -272,7 +272,7 @@ class AnalysisResultTest extends WordSpec with Matchers with SparkContextSpec wi
               |"region":"EU", "dataset_date":$DATE_ONE}]"""
               .stripMargin.replaceAll("\n", "")
 
-          AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
+          assertSameJson(analysisResultsAsJson, expected)
         }
       }
 
@@ -309,7 +309,7 @@ class AnalysisResultTest extends WordSpec with Matchers with SparkContextSpec wi
 
         val expected = """[]"""
 
-        AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
+        assertSameJson(analysisResultsAsJson, expected)
       }
   }
 
