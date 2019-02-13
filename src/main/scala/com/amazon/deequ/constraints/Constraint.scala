@@ -18,6 +18,7 @@ package com.amazon.deequ.constraints
 
 import com.amazon.deequ.analyzers._
 import com.amazon.deequ.metrics.{Distribution, Metric}
+import com.amazon.deequ.schema.ColumnName
 import org.apache.spark.sql.expressions.UserDefinedFunction
 
 import scala.util.matching.Regex
@@ -270,7 +271,7 @@ object Constraint {
       hint: Option[String] = None)
     : Constraint = {
 
-    val compliance = Compliance(name, column, where)
+    val compliance = Compliance(name, ColumnName.sanitize(column), where)
 
     val constraint = AnalysisBasedConstraint[NumMatchesAndCount, Double, Double](
       compliance, assertion, hint = hint)
