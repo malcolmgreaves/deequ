@@ -18,10 +18,10 @@ package com.amazon.deequ.analyzers
 
 import com.amazon.deequ.analyzers.Analyzers._
 import com.amazon.deequ.metrics.{DoubleMetric, Entity}
-//import org.apache.spark.sql.functions.{col, sum, udf}
+import com.amazon.deequ.schema.ColumnName
+import org.apache.spark.sql.functions.{col, sum, udf}
 import org.apache.spark.sql.types.StructType
 import Analyzers.COUNT_COL
-import com.amazon.deequ.analyzers.runners.MetricCalculationException
 
 /**
   * Mutual Information describes how much information about one column can be inferred from another
@@ -41,10 +41,14 @@ case class MutualInformation(columns: Seq[String])
 
       case Some(theState) =>
         val total = theState.numRows
-        val Seq(col1, col2) = columns
+        val Seq(unsafeCol1, unsafeCol2) = columns
+        val col1 = ColumnName.sanitize(unsafeCol1)
+        val col2 = ColumnName.sanitize(unsafeCol2)
 
-        val freqCol1 = s"__deequ_f1_$col1"
-        val freqCol2 = s"__deequ_f2_$col2"
+        // NOTE: DO NOT REMOVE THE SURROUNDING BACKTICKS (``).
+        //       THEY ENSURE THAT THE ENTIRE COLUMN NAME IS ESCAPED AND THUS SAFE FOR Spark SQL.
+        val freqCol1 = s"`__deequ_f1_$unsafeCol1`"
+        val freqCol2 = s"`__deequ_f2_$unsafeCol2`"
 
         val jointStats = theState.frequencies
 
@@ -64,7 +68,9 @@ case class MutualInformation(columns: Seq[String])
             (pxy / total) * math.log((pxy / total) / ((px / total) * (py / total)))
         }
 
-        val miCol = s"__deequ_mi_${col1}_$col2"
+        // NOTE: DO NOT REMOVE THE SURROUNDING BACKTICKS (``).
+        //       THEY ENSURE THAT THE ENTIRE COLUMN NAME IS ESCAPED AND THUS SAFE FOR Spark SQL.
+        val miCol = s"`__deequ_mi_${unsafeCol1}_$unsafeCol2`"
         val value = jointStats
           .join(marginalStats1, usingColumn = col1)
           .join(marginalStats2, usingColumn = col2)
