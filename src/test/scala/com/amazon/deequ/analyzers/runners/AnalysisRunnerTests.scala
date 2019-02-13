@@ -53,8 +53,8 @@ class AnalysisRunnerTests extends WordSpec with Matchers with SparkContextSpec w
         val df = getDfWithNumericValues(sparkSession)
 
         val analyzers =
-          Completeness("]att1[") :: Compliance("rule1", "]att1[ > 3") ::
-          Completeness("att2") :: Compliance("rule1", "]att1[ > 2") ::
+          Completeness("]att1[") :: Compliance("rule1", "`]att1[` > 3") ::
+          Completeness("att2") :: Compliance("rule1", "`]att1[` > 2") ::
           Compliance("rule1", "att2 > 2") ::
           ApproxQuantile("att2", 0.5) :: Nil
 

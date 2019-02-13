@@ -265,10 +265,10 @@ class AnalysisResultTest extends WordSpec with Matchers with SparkContextSpec wi
               |"region":"EU", "dataset_date":$DATE_ONE},
               |{"entity":"Column","instance":"]att1[","name":"Completeness","value":1.0,
               |"region":"EU", "dataset_date":$DATE_ONE},
-              |{"entity":"Column","instance":"item","name":"Distinctness","value":1.0,
-              |"region":"EU", "dataset_date":$DATE_ONE},
               |{"entity":"Mutlicolumn","instance":"]att1[,att2",
               |"name":"Uniqueness","value":0.25,
+              |"region":"EU", "dataset_date":$DATE_ONE},
+              |{"entity":"Column","instance":"item","name":"Distinctness","value":1.0,
               |"region":"EU", "dataset_date":$DATE_ONE}]"""
               .stripMargin.replaceAll("\n", "")
 

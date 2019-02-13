@@ -171,16 +171,16 @@ class AnalyzerTests extends WordSpec with Matchers with SparkContextSpec with Fi
   "Compliance analyzer" should {
     "compute correct metrics " in withSparkSession { sparkSession =>
       val df = getDfWithNumericValues(sparkSession)
-      assert(Compliance("rule1", "]att1[ > 3").calculate(df) ==
+      assert(Compliance("rule1", "`]att1[` > 3").calculate(df) ==
         DoubleMetric(Entity.Column, "Compliance", "rule1", Success(3.0 / 6)))
-      assert(Compliance("rule2", "]att1[ > 2").calculate(df) ==
+      assert(Compliance("rule2", "`]att1[` > 2").calculate(df) ==
         DoubleMetric(Entity.Column, "Compliance", "rule2", Success(4.0 / 6)))
 
     }
 
     "compute correct metrics with filtering" in withSparkSession { sparkSession =>
       val df = getDfWithNumericValues(sparkSession)
-      val result = Compliance("rule1", "att2 = 0", Some("]att1[ < 4")).calculate(df)
+      val result = Compliance("rule1", "att2 = 0", Some("`]att1[` < 4")).calculate(df)
       assert(result == DoubleMetric(Entity.Column, "Compliance", "rule1", Success(1.0)))
     }
 

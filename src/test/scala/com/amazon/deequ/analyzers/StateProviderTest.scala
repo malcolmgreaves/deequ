@@ -36,7 +36,7 @@ class StateProviderTest extends WordSpec with Matchers with SparkContextSpec wit
       assertCorrectlyRestoresState[NumMatchesAndCount](provider, provider,
         Completeness("]att1["), data)
       assertCorrectlyRestoresState[NumMatchesAndCount](provider, provider,
-        Compliance("]att1[", "]att1[ = 'b'"), data)
+        Compliance("]att1[", "`]att1[` = 'b'"), data)
       assertCorrectlyRestoresState[NumMatchesAndCount](provider, provider,
         PatternMatch("]att1[", Patterns.EMAIL), data)
 
@@ -72,7 +72,7 @@ class StateProviderTest extends WordSpec with Matchers with SparkContextSpec wit
       assertCorrectlyRestoresState[NumMatchesAndCount](provider, provider,
         Completeness("]att1["), data)
       assertCorrectlyRestoresState[NumMatchesAndCount](provider, provider,
-        Compliance("]att1[", "]att1[ = 'b'"), data)
+        Compliance("]att1[", "`]att1[` = 'b'"), data)
 
       assertCorrectlyRestoresState[NumMatchesAndCount](provider, provider,
         PatternMatch("]att1[", Patterns.EMAIL), data)

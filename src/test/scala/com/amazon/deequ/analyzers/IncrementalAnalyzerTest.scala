@@ -55,7 +55,7 @@ class IncrementalAnalyzerTest extends WordSpec with Matchers with SparkContextSp
   "ComplianceAnalyzer" should {
     "compute correct metrics" in withSparkSession { session =>
 
-      val analyzer = Compliance("]att1[", "]att1[ = 'b'")
+      val analyzer = Compliance("]att1[", "`]att1[` = 'b'")
 
       val initial = initialData(session)
       val delta = deltaData(session)
