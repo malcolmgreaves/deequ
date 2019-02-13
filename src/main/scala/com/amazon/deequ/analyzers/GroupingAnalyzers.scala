@@ -16,14 +16,14 @@
 
 package com.amazon.deequ.analyzers
 
+import com.amazon.deequ.schema.ColumnName
 import org.apache.spark.sql.{Column, DataFrame, Row}
-//import org.apache.spark.sql.functions.{coalesce, col, count, expr, lit}
+import org.apache.spark.sql.functions.{coalesce, col, count, expr, lit}
 import Analyzers.COUNT_COL
 import com.amazon.deequ.metrics.DoubleMetric
 import Analyzers._
 import org.apache.spark.sql.types.StructType
 import Preconditions._
-import com.amazon.deequ.analyzers.runners.MetricCalculationException
 
 /** Base class for all analyzers that operate the frequencies of groups in the data */
 abstract class FrequencyBasedAnalyzer(columnsToGroupOn: Seq[String])
@@ -56,13 +56,19 @@ object FrequencyBasedAnalyzer {
       numRows: Option[Long] = None)
     : FrequenciesAndNumRows = {
 
-    val columnsToGroupBy = groupingColumns.map { name => col(name) }.toArray
+    val columnsToGroupBy = groupingColumns.map { unsafeColumnName =>
+      val column = ColumnName.sanitize(unsafeColumnName)
+      col(column)
+    }.toArray
     val projectionColumns = columnsToGroupBy :+ col(COUNT_COL)
 
     val noGroupingColumnIsNull = groupingColumns
-      .foldLeft(expr(true.toString)) { case (condition, name) =>
-        condition.and(col(name).isNotNull)
+      .foldLeft(expr(true.toString)) { case (condition, unsafeColumnName) =>
+        val column = ColumnName.sanitize(unsafeColumnName)
+        condition.and(col(column).isNotNull)
       }
+
+
 
     val frequencies = data
       .select(columnsToGroupBy: _*)
@@ -132,7 +138,10 @@ case class FrequenciesAndNumRows(frequencies: DataFrame, numRows: Long)
       .filterNot { _ == COUNT_COL }
 
     val projectionAfterMerge =
-      columns.map { column => coalesce(col(s"this.$column"), col(s"other.$column")).as(column) } ++
+      columns.map { unsafeColumnName =>
+        val column = ColumnName.sanitize(unsafeColumnName)
+        coalesce(col(s"this.$column"), col(s"other.$column")).as(column)
+      } ++
         Seq((zeroIfNull(s"this.$COUNT_COL") + zeroIfNull(s"other.$COUNT_COL")).as(COUNT_COL))
 
     /* Null-safe join condition over equality on grouping columns */
@@ -147,11 +156,13 @@ case class FrequenciesAndNumRows(frequencies: DataFrame, numRows: Long)
     FrequenciesAndNumRows(frequenciesSum, numRows + other.numRows)
   }
 
-  private[analyzers] def nullSafeEq(column: String): Column = {
+  private[analyzers] def nullSafeEq(unsafeColumnName: String): Column = {
+    val column = ColumnName.sanitize(unsafeColumnName)
     col(s"this.$column") <=> col(s"other.$column")
   }
 
-  private[analyzers] def zeroIfNull(column: String): Column = {
+  private[analyzers] def zeroIfNull(unsafeColumnName: String): Column = {
+    val column = ColumnName.sanitize(unsafeColumnName)
     coalesce(col(column), lit(0))
   }
 }
