@@ -19,7 +19,7 @@ package com.amazon.deequ.repository
 import java.time.{LocalDate, ZoneOffset}
 
 import com.amazon.deequ.SparkContextSpec
-import com.amazon.deequ.utils.FixtureSupport
+import com.amazon.deequ.utils.{AssertionUtils, FixtureSupport}
 import org.scalatest.{Matchers, WordSpec}
 import com.amazon.deequ.analyzers._
 import com.amazon.deequ.analyzers.runners.AnalyzerContext
@@ -79,7 +79,7 @@ class AnalysisResultTest extends WordSpec with Matchers with SparkContextSpec wi
               |"region":"EU", "dataset_date":$DATE_ONE}]"""
               .stripMargin.replaceAll("\n", "")
 
-          assertSameJson(analysisResultsAsJson, expected)
+          AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
         }
     }
 
@@ -127,7 +127,7 @@ class AnalysisResultTest extends WordSpec with Matchers with SparkContextSpec wi
               |"region":"EU", "dataset_date":$DATE_ONE}]"""
               .stripMargin.replaceAll("\n", "")
 
-          assertSameJson(analysisResultsAsJson, expected)
+          AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
         }
       }
 
@@ -174,7 +174,7 @@ class AnalysisResultTest extends WordSpec with Matchers with SparkContextSpec wi
             |"region":"EU", "dataset_date":$DATE_ONE}]"""
             .stripMargin.replaceAll("\n", "")
 
-        assertSameJson(analysisResultsAsJson, expected)
+        AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
       }
     }
 
@@ -221,7 +221,7 @@ class AnalysisResultTest extends WordSpec with Matchers with SparkContextSpec wi
             |"name_2":"EU", "dataset_date":$DATE_ONE}]"""
             .stripMargin.replaceAll("\n", "")
 
-        assertSameJson(analysisResultsAsJson, expected)
+        AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
       }
     }
 
@@ -272,7 +272,7 @@ class AnalysisResultTest extends WordSpec with Matchers with SparkContextSpec wi
               |"region":"EU", "dataset_date":$DATE_ONE}]"""
               .stripMargin.replaceAll("\n", "")
 
-          assertSameJson(analysisResultsAsJson, expected)
+          AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
         }
       }
 
@@ -309,7 +309,7 @@ class AnalysisResultTest extends WordSpec with Matchers with SparkContextSpec wi
 
         val expected = """[]"""
 
-        assertSameJson(analysisResultsAsJson, expected)
+        AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
       }
   }
 
@@ -337,10 +337,5 @@ class AnalysisResultTest extends WordSpec with Matchers with SparkContextSpec wi
 
   private[this] def assertSameRows(dataframeA: DataFrame, dataframeB: DataFrame): Unit = {
     assert(dataframeA.collect().toSet == dataframeB.collect().toSet)
-  }
-
-  private[this] def assertSameJson(jsonA: String, jsonB: String): Unit = {
-    assert(SimpleResultSerde.deserialize(jsonA) ==
-      SimpleResultSerde.deserialize(jsonB))
   }
 }

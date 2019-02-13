@@ -17,10 +17,9 @@
 package com.amazon.deequ.analyzers.runners
 
 import com.amazon.deequ.SparkContextSpec
-import com.amazon.deequ.utils.FixtureSupport
+import com.amazon.deequ.utils.{AssertionUtils, FixtureSupport}
 import org.scalatest.{Matchers, WordSpec}
 import com.amazon.deequ.analyzers._
-import com.amazon.deequ.repository.SimpleResultSerde
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class AnalyzerContextTest extends WordSpec with Matchers with SparkContextSpec with FixtureSupport {
@@ -79,7 +78,7 @@ class AnalyzerContextTest extends WordSpec with Matchers with SparkContextSpec w
               |"name":"Uniqueness","value":0.25}]"""
               .stripMargin.replaceAll("\n", "")
 
-          assertSameJson(successMetricsResultsJson, expectedJson)
+          AssertionUtils.assertSameJson(successMetricsResultsJson, expectedJson)
         }
       }
 
@@ -99,7 +98,7 @@ class AnalyzerContextTest extends WordSpec with Matchers with SparkContextSpec w
               |"name":"Uniqueness","value":0.25}]"""
             .stripMargin.replaceAll("\n", "")
 
-          assertSameJson(successMetricsResultsJson, expectedJson)
+          AssertionUtils.assertSameJson(successMetricsResultsJson, expectedJson)
         }
       }
   }
@@ -123,10 +122,5 @@ class AnalyzerContextTest extends WordSpec with Matchers with SparkContextSpec w
 
   private[this] def assertSameRows(dataframeA: DataFrame, dataframeB: DataFrame): Unit = {
     assert(dataframeA.collect().toSet == dataframeB.collect().toSet)
-  }
-
-  private[this] def assertSameJson(jsonA: String, jsonB: String): Unit = {
-    assert(SimpleResultSerde.deserialize(jsonA) ==
-      SimpleResultSerde.deserialize(jsonB))
   }
 }
