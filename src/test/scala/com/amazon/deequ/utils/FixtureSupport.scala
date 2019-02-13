@@ -196,15 +196,6 @@ trait FixtureSupport {
     ).toDF("att1", "att2")
   }
 
-  def getDfWithConditionallyUninformativeSpecialColumns(sparkSession: SparkSession): DataFrame = {
-    import sparkSession.implicits._
-    Seq(
-      (1, 0),
-      (2, 0),
-      (3, 0)
-    ).toDF("]  att1 (", "[]att20((")
-  }
-
   def getDfWithConditionallyInformativeColumns(sparkSession: SparkSession): DataFrame = {
     import sparkSession.implicits._
     Seq(
@@ -227,5 +218,11 @@ trait FixtureSupport {
       .toList
       .map { index => (s"$index", random.shuffle(categories).head)}
       .toDF("att1", "categoricalColumn")
+  }
+
+  def specialNamesDfAtt1Att2(df: DataFrame): DataFrame = {
+    df
+      .withColumnRenamed("att1", ")att1(")
+      .withColumnRenamed("att2", "]att2[")
   }
 }
