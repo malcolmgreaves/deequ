@@ -17,8 +17,9 @@
 package com.amazon.deequ.analyzers
 
 import com.amazon.deequ.analyzers.Preconditions.{hasColumn, isNumeric}
+import com.amazon.deequ.schema.ColumnName
 import org.apache.spark.sql.{Column, Row}
-//import org.apache.spark.sql.functions.min
+import org.apache.spark.sql.functions.min
 import org.apache.spark.sql.types.{DoubleType, StructType}
 import Analyzers._
 
@@ -37,7 +38,7 @@ case class Minimum(column: String, where: Option[String] = None)
   extends StandardScanShareableAnalyzer[MinState]("Minimum", column) {
 
   override def aggregationFunctions(): Seq[Column] = {
-    min(conditionalSelection(column, where)).cast(DoubleType) :: Nil
+    min(conditionalSelection(ColumnName.sanitize(column), where)).cast(DoubleType) :: Nil
   }
 
   override def fromAggregationResult(result: Row, offset: Int): Option[MinState] = {
