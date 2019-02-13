@@ -68,6 +68,53 @@ class ColumnNameTest extends WordSpec with Matchers {
         case x => fail(s"Expecting EmptyColumn, not: $x")
       }
     }
+
+    "be idempotent" in {
+      val originalSanitized = ColumnName.sanitize(" this ][ is s0meth!ng to sanitize (   ")
+      (0 until 10).foldLeft(originalSanitized) {
+        case (sanitized, _) =>
+          val s = ColumnName.sanitize(sanitized)
+          assert(s == originalSanitized)
+          s
+      }
+    }
+
+  }
+
+  "desanitize" should {
+
+    "invert sanitized result" in  {
+      val x = " he!1[] w<>rlD   ("
+      assert(ColumnName.desanitize(ColumnName.sanitize(x)) == x)
+    }
+
+    "cleanly unsanitize sanitized column" in {
+      assert(ColumnName.desanitize("`hello world`") == "hello world")
+    }
+
+    "desanitize leading `" in {
+      assert(ColumnName.desanitize("`hello world") == "hello world")
+    }
+
+    "desanitize trailing `" in {
+      assert(ColumnName.desanitize("hello world`") == "hello world")
+    }
+
+    "evaluate to empty string on null input" in {
+      assert(ColumnName.desanitize(null).length == 0)
+    }
+
+    "be idempotent" in {
+      val originalDesanitized = ColumnName.desanitize("`a_column`")
+      (0 until 10).foldLeft(originalDesanitized) {
+        case (desanitized, _) =>
+        val d = ColumnName.desanitize(desanitized)
+        assert(d == originalDesanitized)
+        d
+      }
+
+    }
+
   }
 
 }

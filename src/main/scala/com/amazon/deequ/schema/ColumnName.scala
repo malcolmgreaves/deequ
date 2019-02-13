@@ -82,6 +82,24 @@ object ColumnName {
   def sanitize(columnName: String): String =
     getOrThrow(sanitizeForSql(columnName))
 
+  /** Inverse of `sanitize`: removes surrounding backticks, if present. */
+  def desanitize(maybeSanitizedName: String): String =
+    if (maybeSanitizedName == null) {
+      ""
+    } else {
+      val woPrefix =
+        if (maybeSanitizedName.startsWith("`"))
+          maybeSanitizedName.slice(1, maybeSanitizedName.length)
+        else
+          maybeSanitizedName
+      val woSuffix =
+        if (woPrefix.endsWith("`"))
+          woPrefix.slice(0, woPrefix.length - 1)
+        else
+          woPrefix
+      woSuffix
+    }
+
 }
 
 sealed abstract class SanitizeError(message: String) extends Exception(message)

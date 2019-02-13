@@ -41,7 +41,7 @@ case class MutualInformation(columns: Seq[String])
 
       case Some(theState) =>
         val total = theState.numRows
-        val Seq(unsafeCol1, unsafeCol2) = columns
+        val Seq(unsafeCol1, unsafeCol2) = columns.map { ColumnName.desanitize }
         val col1 = ColumnName.sanitize(unsafeCol1)
         val col2 = ColumnName.sanitize(unsafeCol2)
 

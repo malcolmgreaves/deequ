@@ -57,15 +57,13 @@ object FrequencyBasedAnalyzer {
     : FrequenciesAndNumRows = {
 
     val columnsToGroupBy = groupingColumns.map { unsafeColumnName =>
-      val column = ColumnName.sanitize(unsafeColumnName)
-      col(column)
+      col(ColumnName.sanitize(unsafeColumnName))
     }.toArray
     val projectionColumns = columnsToGroupBy :+ col(COUNT_COL)
 
     val noGroupingColumnIsNull = groupingColumns
       .foldLeft(expr(true.toString)) { case (condition, unsafeColumnName) =>
-        val column = ColumnName.sanitize(unsafeColumnName)
-        condition.and(col(column).isNotNull)
+        condition.and(col(ColumnName.sanitize(unsafeColumnName)).isNotNull)
       }
 
 
@@ -138,9 +136,8 @@ case class FrequenciesAndNumRows(frequencies: DataFrame, numRows: Long)
       .filterNot { _ == COUNT_COL }
 
     val projectionAfterMerge =
-      columns.map { unsafeColumnName =>
-        val column = ColumnName.sanitize(unsafeColumnName)
-        coalesce(col(s"this.$column"), col(s"other.$column")).as(column)
+      columns.map { column =>
+        coalesce(col(s"`this.$column`"), col(s"`other.$column`")).as(ColumnName.sanitize(column))
       } ++
         Seq((zeroIfNull(s"this.$COUNT_COL") + zeroIfNull(s"other.$COUNT_COL")).as(COUNT_COL))
 
@@ -156,14 +153,12 @@ case class FrequenciesAndNumRows(frequencies: DataFrame, numRows: Long)
     FrequenciesAndNumRows(frequenciesSum, numRows + other.numRows)
   }
 
-  private[analyzers] def nullSafeEq(unsafeColumnName: String): Column = {
-    val column = ColumnName.sanitize(unsafeColumnName)
-    col(s"this.$column") <=> col(s"other.$column")
+  private[analyzers] def nullSafeEq(column: String): Column = {
+    col(s"`this.$column`") <=> col(s"`other.$column`")
   }
 
-  private[analyzers] def zeroIfNull(unsafeColumnName: String): Column = {
-    val column = ColumnName.sanitize(unsafeColumnName)
-    coalesce(col(column), lit(0))
+  private[analyzers] def zeroIfNull(column: String): Column = {
+    coalesce(col(ColumnName.sanitize(column)), lit(0))
   }
 }
 
