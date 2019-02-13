@@ -58,8 +58,9 @@ case class Histogram(
     val totalCount = data.count()
 
     val columnSafeForSql = ColumnName.sanitize(column)
+
     val frequencies = (binningUdf match {
-      case Some(bin) => data.withColumn(columnSafeForSql, bin(col(columnSafeForSql)))
+      case Some(bin) => data.withColumn(column, bin(col(columnSafeForSql)))
       case _ => data
     })
     .select(col(columnSafeForSql).cast(StringType))
