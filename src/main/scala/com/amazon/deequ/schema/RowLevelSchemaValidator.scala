@@ -47,7 +47,6 @@ private[this] case class IntColumnDefinition(
   extends ColumnDefinition {
 
   override val castExpression: Column =
-
     super.castExpression.cast(IntegerType).as(columnName)
 }
 
@@ -235,7 +234,7 @@ object RowLevelSchemaValidator {
         nextCnf = nextCnf.and(columnDefinition.castExpression.isNotNull)
       }
 
-      val colIsNull = columnDefinition.castExpression.isNull
+      val colIsNull = col(columnDefinition.nameForSqlExpr).isNull
 
       columnDefinition match {
 
