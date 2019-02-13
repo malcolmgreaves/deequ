@@ -17,13 +17,12 @@
 package com.amazon.deequ
 package analyzers
 
-import com.amazon.deequ.SparkContextSpec
 import com.amazon.deequ.analyzers.runners.NoSuchColumnException
 import com.amazon.deequ.metrics.{Distribution, DistributionValue, DoubleMetric, Entity}
 import com.amazon.deequ.utils.AssertionUtils.TryUtils
 import com.amazon.deequ.utils.FixtureSupport
 import org.apache.spark.sql.Row
-import org.apache.spark.sql.functions.{col, expr, udf}
+import org.apache.spark.sql.functions.{col, udf}
 import org.apache.spark.sql.types._
 import org.scalatest.{Matchers, WordSpec}
 
