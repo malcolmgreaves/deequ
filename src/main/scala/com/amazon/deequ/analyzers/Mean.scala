@@ -21,7 +21,7 @@ import com.amazon.deequ.schema.ColumnName
 import org.apache.spark.sql.{Column, Row}
 import org.apache.spark.sql.functions.{count, sum}
 import org.apache.spark.sql.types.{DoubleType, StructType, LongType}
-import Analyzers.{ conditionalSelection, ifNoNullsIn }
+import Analyzers._
 
 case class MeanState(sum: Double, count: Long) extends DoubleValuedState[MeanState] {
 
