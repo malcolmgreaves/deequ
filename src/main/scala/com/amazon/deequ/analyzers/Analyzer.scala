@@ -18,7 +18,7 @@ package com.amazon.deequ.analyzers
 
 import com.amazon.deequ.analyzers.Analyzers._
 import com.amazon.deequ.metrics.{DoubleMetric, Entity, Metric}
-//import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Column, DataFrame, Row}
 import com.amazon.deequ.analyzers.runners._
@@ -383,10 +383,12 @@ private[deequ] object Analyzers {
   }
 
   def conditionalSelection(selection: String, where: Option[String]): Column = {
+    // NOTE: `selection` and `where` *MUST* be sanitized and valid Spark SQL.
     conditionalSelection(col(selection), where)
   }
 
   def conditionalSelection(selection: Column, condition: Option[String]): Column = {
+    // NOTE: `condition` *MUST* be sanitized and valid Spark SQL.
     val conditionColumn = condition.map { expression => expr(expression) }
     conditionalSelectionFromColumns(selection, conditionColumn)
   }
@@ -402,6 +404,7 @@ private[deequ] object Analyzers {
   }
 
   def conditionalCount(where: Option[String]): Column = {
+    // NOTE: `where` *MUST* be sanitized and valid Spark SQL.
     where
       .map { filter => sum(expr(filter).cast(LongType)) }
       .getOrElse(count("*"))
