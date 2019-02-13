@@ -218,30 +218,35 @@ trait FixtureSupport extends Assertions {
       .toDF("]att1[", "categoricalColumn")
   }
 
+  implicit object OrderingTestMap extends Ordering[Map[String, Any]] {
+
+    type T = Map[String, Any]
+
+    def get(key: String)(x: T): String =
+      x.get(key).fold("")(_.asInstanceOf[String])
+
+    override def compare(x: T, y: T): Int = {
+      val instance = get("instance") _
+      val name = get("name") _
+      val columnName = get("column_name") _
+
+      val cmp1 = instance(x).compareTo(instance(y))
+      if (cmp1 == 0) {
+        val cmp2 = name(x).compareTo(name(y))
+        if (cmp2 == 0) {
+          columnName(x).compareTo(columnName(y))
+        } else {
+          cmp2
+        }
+      } else {
+        cmp1
+      }
+    }
+  }
+
   def assertSameJson(jsonA: String, jsonB: String): Unit = {
     val a = SimpleResultSerde.deserialize(jsonA)
     val b = SimpleResultSerde.deserialize(jsonB)
-
-    implicit object OrderingTestMap extends Ordering[Map[String, Any]] {
-
-      type T = Map[String, Any]
-
-      def get(key: String)(x: T): String =
-        x.get(key).fold("")(_.asInstanceOf[String])
-
-      override def compare(x: T, y: T): Int = {
-        val instance = get("instance") _
-        val name = get("name") _
-
-        val cmp1 = instance(x).compareTo(instance(y))
-        if (cmp1 == 0) {
-          name(x).compareTo(name(y))
-        } else {
-          cmp1
-        }
-      }
-    }
-
-    Assertions.assert(a.sorted == b.sorted)
+    assert(a.sorted == b.sorted)
   }
 }

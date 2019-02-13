@@ -19,7 +19,7 @@ package com.amazon.deequ.suggestions
 import com.amazon.deequ.SparkContextSpec
 import com.amazon.deequ.suggestions.rules.UniqueIfApproximatelyUniqueRule
 import com.amazon.deequ.utils.FixtureSupport
-import com.google.gson.JsonParser
+import com.google.gson.{JsonElement, JsonParser}
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{Matchers, WordSpec}
 
@@ -490,9 +490,20 @@ class ConstraintSuggestionResultTest extends WordSpec with Matchers with SparkCo
 
   private[this] def assertJsonStringsAreEqual(jsonA: String, jsonB: String): Unit = {
 
-    val parser = new JsonParser()
+    val (a, b) = {
+      import scala.collection.JavaConverters._
+      val get: JsonElement => Seq[Map[String, Any]] = _
+        .getAsJsonObject.get("constraint_suggestions").getAsJsonArray.asScala.toSeq
+        .map { _
+          .getAsJsonObject.entrySet.asScala
+          .map { e => (e.getKey, e.getValue.getAsString) }
+          .toMap[String, Any]
+        }
+      val parser = new JsonParser()
+      (get(parser.parse(jsonA)), get(parser.parse(jsonB)))
+    }
 
-    assert(parser.parse(jsonA) == parser.parse(jsonB))
+    assert(a.sorted == b.sorted)
   }
 
 }
