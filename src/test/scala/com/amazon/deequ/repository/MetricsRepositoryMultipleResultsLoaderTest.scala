@@ -225,8 +225,6 @@ class MetricsRepositoryMultipleResultsLoaderTest extends WordSpec with Matchers
               .stripMargin.replaceAll("\n", "")
 
           assertSameJson(analysisResultsAsJson, expected)
-
-          assertSameJson(analysisResultsAsJson, expected)
         }
       }
   }
@@ -263,7 +261,18 @@ class MetricsRepositoryMultipleResultsLoaderTest extends WordSpec with Matchers
   }
 
   private[this] def assertSameJson(jsonA: String, jsonB: String): Unit = {
-    assert(SimpleResultSerde.deserialize(jsonA) ==
-      SimpleResultSerde.deserialize(jsonB))
+    val a = SimpleResultSerde.deserialize(jsonA)
+    val b = SimpleResultSerde.deserialize(jsonB)
+
+    implicit object OrderingTestMap extends Ordering[Map[String,Any]]{
+      override def compare(x: Map[String, Any],y: Map[String, Any]): Int = {
+        val instance: Map[String,Any] => String  =
+          _.get("instance").fold("")(_.asInstanceOf[String])
+        instance(x).compareTo(instance(y))
+      }
+    }
+
+    assert(a.sorted == b.sorted)
   }
+
 }
