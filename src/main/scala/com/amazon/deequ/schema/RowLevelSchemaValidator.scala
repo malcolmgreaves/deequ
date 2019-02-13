@@ -16,21 +16,21 @@
 
 package com.amazon.deequ.schema
 
-//import org.apache.spark.sql.functions.{col, expr, length, not, unix_timestamp, regexp_extract}
+import org.apache.spark.sql.functions.{col, expr, length, not, unix_timestamp, regexp_extract}
 import org.apache.spark.sql.types.{DataTypes, DecimalType, IntegerType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.storage.StorageLevel
 
 
 sealed trait ColumnDefinition {
-  def name: String
+  def columnName: String
+  final val nameForSqlExpr: String = ColumnName.sanitize(columnName)
   def isNullable: Boolean
-
-  def castExpression(): Column = { col(name) }
+  def castExpression: Column = col(nameForSqlExpr)
 }
 
 private[this] case class StringColumnDefinition(
-    name: String,
+    columnName: String,
     isNullable: Boolean = true,
     minLength: Option[Int] = None,
     maxLength: Option[Int] = None,
@@ -38,34 +38,35 @@ private[this] case class StringColumnDefinition(
   extends ColumnDefinition
 
 private[this] case class IntColumnDefinition(
-    name: String,
+    columnName: String,
     isNullable: Boolean = true,
     minValue: Option[Int] = None,
     maxValue: Option[Int] = None)
   extends ColumnDefinition {
 
-  override def castExpression(): Column = { col(name).cast(IntegerType).as(name) }
+  override val castExpression: Column =
+    super.castExpression.cast(IntegerType).as(nameForSqlExpr)
 }
 
 private[this] case class DecimalColumnDefinition(
-    name: String,
+    columnName: String,
     precision: Int,
     scale: Int,
     isNullable: Boolean = true)
   extends ColumnDefinition {
 
-  override def castExpression(): Column = { col(name).cast(DecimalType(precision, scale)).as(name) }
+  override val castExpression: Column =
+    super.castExpression.cast(DecimalType(precision, scale)).as(nameForSqlExpr)
 }
 
 private[this] case class TimestampColumnDefinition(
-    name: String,
+    columnName: String,
     mask: String,
     isNullable: Boolean = true)
   extends ColumnDefinition {
 
-  override def castExpression(): Column = {
-    unix_timestamp(col(name), mask).cast(TimestampType).as(name)
-  }
+  override val castExpression: Column =
+    unix_timestamp(super.castExpression, mask).cast(TimestampType).as(nameForSqlExpr)
 }
 
 
@@ -211,13 +212,13 @@ object RowLevelSchemaValidator {
     : DataFrame = {
 
     val castExpressions = schema.columnDefinitions
-      .map { colDef => colDef.name -> colDef.castExpression() }
+      .map { colDef => colDef.columnName -> colDef.castExpression }
       .toMap
 
     val projection = dataWithMatches.schema
       .map { _.name }
       .filter { _ != MATCHES_COLUMN }
-      .map { name => castExpressions.getOrElse(name, col(name)) }
+      .map { name => castExpressions.getOrElse(name, col(ColumnName.sanitize(name))) }
 
     dataWithMatches.select(projection: _*).where(col(MATCHES_COLUMN))
   }
@@ -228,16 +229,16 @@ object RowLevelSchemaValidator {
       var nextCnf = cnf
 
       if (!columnDefinition.isNullable) {
-        nextCnf = nextCnf.and(col(columnDefinition.name).isNotNull)
+        nextCnf = nextCnf.and(columnDefinition.castExpression.isNotNull)
       }
 
-      val colIsNull = col(columnDefinition.name).isNull
+      val colIsNull = columnDefinition.castExpression.isNull
 
       columnDefinition match {
 
         case intDef: IntColumnDefinition =>
 
-          val colAsInt = col(intDef.name).cast(IntegerType)
+          val colAsInt = col(intDef.nameForSqlExpr).cast(IntegerType)
 
           /* null or successfully casted */
           nextCnf = nextCnf.and(colIsNull.or(colAsInt.isNotNull))
@@ -253,26 +254,26 @@ object RowLevelSchemaValidator {
         case decDef: DecimalColumnDefinition =>
 
           val decType = DataTypes.createDecimalType(decDef.precision, decDef.scale)
-          nextCnf = nextCnf.and(colIsNull.or(col(decDef.name).cast(decType).isNotNull))
+          nextCnf = nextCnf.and(colIsNull.or(col(decDef.nameForSqlExpr).cast(decType).isNotNull))
 
         case strDef: StringColumnDefinition =>
 
           strDef.minLength.foreach { value =>
-            nextCnf = nextCnf.and(colIsNull.or(length(col(strDef.name)).geq(value)))
+            nextCnf = nextCnf.and(colIsNull.or(length(col(strDef.nameForSqlExpr)).geq(value)))
           }
 
           strDef.maxLength.foreach { value =>
-            nextCnf = nextCnf.and(colIsNull.or(length(col(strDef.name)).leq(value)))
+            nextCnf = nextCnf.and(colIsNull.or(length(col(strDef.nameForSqlExpr)).leq(value)))
           }
 
           strDef.matches.foreach { regex =>
             nextCnf = nextCnf
-              .and(colIsNull.or(regexp_extract(col(strDef.name), regex, 0).notEqual("")))
+              .and(colIsNull.or(regexp_extract(col(strDef.nameForSqlExpr), regex, 0).notEqual("")))
           }
 
         case tsDef: TimestampColumnDefinition =>
           /* null or successfully casted */
-          nextCnf = nextCnf.and(colIsNull.or(unix_timestamp(col(tsDef.name), tsDef.mask)
+          nextCnf = nextCnf.and(colIsNull.or(unix_timestamp(col(tsDef.nameForSqlExpr), tsDef.mask)
             .cast(TimestampType).isNotNull))
       }
 
