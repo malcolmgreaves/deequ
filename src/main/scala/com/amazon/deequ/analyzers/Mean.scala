@@ -51,7 +51,6 @@ case class Mean(column: String, where: Option[String] = None)
   }
 
   override protected def additionalPreconditions(): Seq[StructType => Unit] = {
-    val columnSafeForSql = ColumnName.sanitize(column)
-    hasColumn(columnSafeForSql) :: isNumeric(columnSafeForSql) :: Nil
+    hasColumn(column) :: isNumeric(column) :: Nil
   }
 }

@@ -271,7 +271,7 @@ object Constraint {
       hint: Option[String] = None)
     : Constraint = {
 
-    val compliance = Compliance(name, ColumnName.sanitize(column), where)
+    val compliance = Compliance(name, column, where)
 
     val constraint = AnalysisBasedConstraint[NumMatchesAndCount, Double, Double](
       compliance, assertion, hint = hint)
