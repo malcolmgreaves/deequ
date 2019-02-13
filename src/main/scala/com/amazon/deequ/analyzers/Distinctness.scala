@@ -17,7 +17,7 @@
 package com.amazon.deequ.analyzers
 
 import com.amazon.deequ.analyzers.Analyzers.COUNT_COL
-//import org.apache.spark.sql.functions.{col, sum}
+import org.apache.spark.sql.functions.{col, sum}
 import org.apache.spark.sql.types.DoubleType
 import org.apache.spark.sql.Column
 
