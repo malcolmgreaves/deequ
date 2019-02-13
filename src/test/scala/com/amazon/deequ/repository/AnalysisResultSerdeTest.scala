@@ -21,7 +21,7 @@ import java.time.{LocalDate, ZoneOffset}
 import com.amazon.deequ.analyzers.{Compliance, DataType, Entropy, Histogram, Maximum, Mean, Minimum, MutualInformation, StandardDeviation, Uniqueness, _}
 import com.amazon.deequ.analyzers.runners.AnalyzerContext
 import com.amazon.deequ.metrics._
-import com.amazon.deequ.utils.FixtureSupport
+import com.amazon.deequ.utils.{AssertionUtils, FixtureSupport}
 import org.scalatest._
 import AnalysisResultSerde._
 import com.amazon.deequ.SparkContextSpec
@@ -233,8 +233,6 @@ class SimpleResultSerdeTest extends WordSpec with Matchers with SparkContextSpec
           |"instance":"]att1[,att2","name":"MutualInformation","value":0.5623351446188083}]"""
             .stripMargin.replaceAll("\n", "")
 
-      // ordering of map entries is not guaranteed, so comparing strings is not an option
-      assert(SimpleResultSerde.deserialize(sucessMetricsResultJson) ==
-        SimpleResultSerde.deserialize(expected))
+      AssertionUtils.assertSameJson(sucessMetricsResultJson, expected)
     }
 }
