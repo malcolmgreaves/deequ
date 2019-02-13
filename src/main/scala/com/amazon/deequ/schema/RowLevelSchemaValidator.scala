@@ -37,6 +37,8 @@ private[this] case class StringColumnDefinition(
     matches: Option[String] = None)
   extends ColumnDefinition
 
+// NOTE: `.as(...)` will properly escape its input column name alias
+
 private[this] case class IntColumnDefinition(
     columnName: String,
     isNullable: Boolean = true,
@@ -45,7 +47,8 @@ private[this] case class IntColumnDefinition(
   extends ColumnDefinition {
 
   override val castExpression: Column =
-    super.castExpression.cast(IntegerType).as(nameForSqlExpr)
+
+    super.castExpression.cast(IntegerType).as(columnName)
 }
 
 private[this] case class DecimalColumnDefinition(
@@ -56,7 +59,7 @@ private[this] case class DecimalColumnDefinition(
   extends ColumnDefinition {
 
   override val castExpression: Column =
-    super.castExpression.cast(DecimalType(precision, scale)).as(nameForSqlExpr)
+    super.castExpression.cast(DecimalType(precision, scale)).as(columnName)
 }
 
 private[this] case class TimestampColumnDefinition(
@@ -66,7 +69,7 @@ private[this] case class TimestampColumnDefinition(
   extends ColumnDefinition {
 
   override val castExpression: Column =
-    unix_timestamp(super.castExpression, mask).cast(TimestampType).as(nameForSqlExpr)
+    unix_timestamp(super.castExpression, mask).cast(TimestampType).as(columnName)
 }
 
 

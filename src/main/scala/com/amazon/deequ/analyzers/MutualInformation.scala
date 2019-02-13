@@ -47,6 +47,8 @@ case class MutualInformation(columns: Seq[String])
 
         val jointStats = theState.frequencies
 
+        // NOTE: `.as(...)` will properly escape its input column name alias
+
         val marginalStats1 = jointStats
           .select(col1, COUNT_COL)
           .groupBy(col1)
