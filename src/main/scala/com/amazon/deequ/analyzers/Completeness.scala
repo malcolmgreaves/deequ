@@ -17,7 +17,6 @@
 package com.amazon.deequ.analyzers
 
 import com.amazon.deequ.analyzers.Preconditions.hasColumn
-import com.amazon.deequ.schema.ColumnName
 import org.apache.spark.sql.functions.sum
 import org.apache.spark.sql.types.{IntegerType, StructType}
 import Analyzers._
@@ -36,7 +35,7 @@ case class Completeness(column: String, where: Option[String] = None) extends
 
   override def aggregationFunctions(): Seq[Column] = {
 
-    val summation = sum(conditionalSelection(ColumnName.sanitize(column), where)
+    val summation = sum(conditionalSelection(column, where)
       .isNotNull.cast(IntegerType))
 
     summation :: conditionalCount(where) :: Nil

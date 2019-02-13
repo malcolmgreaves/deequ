@@ -134,10 +134,10 @@ case class FrequenciesAndNumRows(frequencies: DataFrame, numRows: Long)
     val columns = frequencies.schema.fields
       .map { _.name }
       .filterNot { _ == COUNT_COL }
+      .map { ColumnName.sanitize }
 
     val projectionAfterMerge =
-      columns.map { unsafeColumn =>
-        val column = ColumnName.sanitize(unsafeColumn)
+      columns.map { column =>
         coalesce(col(s"this.$column"), col(s"other.$column")).as(column)
       } ++
         Seq((zeroIfNull(s"this.$COUNT_COL") + zeroIfNull(s"other.$COUNT_COL")).as(COUNT_COL))
@@ -154,13 +154,13 @@ case class FrequenciesAndNumRows(frequencies: DataFrame, numRows: Long)
     FrequenciesAndNumRows(frequenciesSum, numRows + other.numRows)
   }
 
-  private[analyzers] def nullSafeEq(unsafeColumn: String): Column = {
-    val column = ColumnName.sanitize(unsafeColumn)
+  /* NOTE: Caller is responsible for ensuring that `column` is sanitized & safe for Spark SQL. */
+  private[analyzers] def nullSafeEq(column: String): Column = {
     col(s"this.$column") <=> col(s"other.$column")
   }
 
+  /* NOTE: Caller is responsible for ensuring that `column` is sanitized & safe for Spark SQL. */
   private[analyzers] def zeroIfNull(column: String): Column = {
-    // NOTE: Caller is responsible for ensuring that `column` is sanitized & safe for Spark SQL.
     coalesce(col(column), lit(0))
   }
 }

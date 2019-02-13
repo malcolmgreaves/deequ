@@ -57,6 +57,7 @@ class StateAggregationIntegrationTest extends WordSpec with Matchers with SparkC
 
       val completeness = Completeness("origin")
 
+
       val completenessStateNA = completeness.computeStateFrom(partitionNA)
       val completenessStateEU = completeness.computeStateFrom(partitionEU)
       val completenessStateIN = completeness.computeStateFrom(partitionIN)
@@ -107,12 +108,24 @@ class StateAggregationIntegrationTest extends WordSpec with Matchers with SparkC
 
       val distinctness = Distinctness("item")
 
+      println("\n\n\nAFTER A\n\n\n")
+
       val distinctnessStateNA = distinctness.computeStateFrom(partitionNA)
+
+      println("\n\n\nAFTER B\n\n\n")
+
       val distinctnessStateEU = distinctness.computeStateFrom(partitionEU)
+
+      println("\n\n\nAFTER C\n\n\n")
+
       val distinctnessStateIN = distinctness.computeStateFrom(partitionIN)
+
+      println("\n\n\nAFTER D\n\n\n")
 
       val distinctnessState = Analyzers.merge(distinctnessStateNA, distinctnessStateEU,
         distinctnessStateIN)
+
+      println("\n\n\nAFTER Z\n\n\n")
 
       val distinctnessNA = distinctness.computeMetricFrom(distinctnessStateNA)
       val distinctnessEU = distinctness.computeMetricFrom(distinctnessStateEU)
