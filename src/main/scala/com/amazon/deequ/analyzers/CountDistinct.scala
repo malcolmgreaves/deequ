@@ -18,8 +18,7 @@ package com.amazon.deequ.analyzers
 
 import com.amazon.deequ.metrics.DoubleMetric
 import org.apache.spark.sql.{Column, Row}
-//import org.apache.spark.sql.functions.count
-import Analyzers._
+import org.apache.spark.sql.functions.count
 
 case class CountDistinct(columns: Seq[String])
   extends ScanShareableFrequencyBasedAnalyzer("CountDistinct", columns) {
