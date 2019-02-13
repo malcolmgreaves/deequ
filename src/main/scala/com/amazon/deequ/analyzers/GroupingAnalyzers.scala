@@ -134,17 +134,20 @@ case class FrequenciesAndNumRows(frequencies: DataFrame, numRows: Long)
     val columns = frequencies.schema.fields
       .map { _.name }
       .filterNot { _ == COUNT_COL }
-      .map { ColumnName.sanitize }
 
     val projectionAfterMerge =
-      columns.map { column =>
-        coalesce(col(s"this.$column"), col(s"other.$column")).as(column)
+      columns.map { unsanitizedColumn =>
+        val column = ColumnName.sanitize(unsanitizedColumn)
+        // `.as(...)` will properly escape its input column name alias
+        coalesce(col(s"this.$column"), col(s"other.$column")).as(unsanitizedColumn)
       } ++
         Seq((zeroIfNull(s"this.$COUNT_COL") + zeroIfNull(s"other.$COUNT_COL")).as(COUNT_COL))
 
     /* Null-safe join condition over equality on grouping columns */
     val joinCondition = columns.tail
-      .foldLeft(nullSafeEq(columns.head)) { case (expr, column) => expr.and(nullSafeEq(column)) }
+      .foldLeft(nullSafeEq(ColumnName.sanitize(columns.head))) {
+        case (expr, column) => expr.and(nullSafeEq(ColumnName.sanitize(column)))
+      }
 
     /* Null-safe outer join to merge histograms */
     val frequenciesSum = frequencies.alias("this")
