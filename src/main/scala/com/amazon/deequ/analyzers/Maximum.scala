@@ -21,7 +21,7 @@ import com.amazon.deequ.schema.ColumnName
 import org.apache.spark.sql.{Column, Row}
 import org.apache.spark.sql.functions.max
 import org.apache.spark.sql.types.{DoubleType, StructType}
-import Analyzers.{ conditionalSelection, ifNoNullsIn }
+import Analyzers._
 
 case class MaxState(maxValue: Double) extends DoubleValuedState[MaxState] {
 
