@@ -3,8 +3,10 @@
 **/*.iml
 target/.travis/public-signing-key.gpg
 target/
+*.swp
 
 
 # TODO -- remove this and below
 *.sbt
 project/
+FAILED
