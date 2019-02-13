@@ -18,7 +18,7 @@ package com.amazon.deequ.analyzers
 
 import com.amazon.deequ.analyzers.Analyzers.COUNT_COL
 import org.apache.spark.sql.Column
-//import org.apache.spark.sql.functions.{col, sum, udf}
+import org.apache.spark.sql.functions.{col, sum, udf}
 
 /**
   * Entropy is a measure of the level of information contained in a message. Given the probability
