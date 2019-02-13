@@ -16,6 +16,8 @@
 
 package com.amazon.deequ.utils
 
+import com.amazon.deequ.repository.SimpleResultSerde
+
 import scala.util.{Failure, Success, Try}
 
 object AssertionUtils {
@@ -43,6 +45,21 @@ object AssertionUtils {
       }
     }
 
+  }
+
+  def assertSameJson(jsonA: String, jsonB: String): Unit = {
+    val a = SimpleResultSerde.deserialize(jsonA)
+    val b = SimpleResultSerde.deserialize(jsonB)
+
+    implicit object OrderingTestMap extends Ordering[Map[String,Any]]{
+      override def compare(x: Map[String, Any],y: Map[String, Any]): Int = {
+        val instance: Map[String,Any] => String  =
+          _.get("instance").fold("")(_.asInstanceOf[String])
+        instance(x).compareTo(instance(y))
+      }
+    }
+
+    assert(a.sorted == b.sorted)
   }
 
 }

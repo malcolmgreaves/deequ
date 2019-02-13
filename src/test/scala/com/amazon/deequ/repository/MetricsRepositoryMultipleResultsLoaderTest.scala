@@ -19,7 +19,7 @@ package com.amazon.deequ.repository
 import java.time.{LocalDate, ZoneOffset}
 
 import com.amazon.deequ.SparkContextSpec
-import com.amazon.deequ.utils.FixtureSupport
+import com.amazon.deequ.utils.{AssertionUtils, FixtureSupport}
 import org.scalatest.{Matchers, WordSpec}
 import com.amazon.deequ.analyzers._
 import com.amazon.deequ.analyzers.runners.AnalyzerContext
@@ -101,7 +101,7 @@ class MetricsRepositoryMultipleResultsLoaderTest extends WordSpec with Matchers
               |"region":"NA", "dataset_date":$DATE_TWO}]"""
               .stripMargin.replaceAll("\n", "")
 
-          assertSameJson(analysisResultsAsJson, expected)
+          AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
         }
       }
 
@@ -141,7 +141,7 @@ class MetricsRepositoryMultipleResultsLoaderTest extends WordSpec with Matchers
 
           val expected = """[]"""
 
-          assertSameJson(analysisResultsAsJson, expected)
+          AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
         }
       }
 
@@ -224,7 +224,7 @@ class MetricsRepositoryMultipleResultsLoaderTest extends WordSpec with Matchers
               |"dataset_name":null, "dataset_version":"2.0"}]"""
               .stripMargin.replaceAll("\n", "")
 
-          assertSameJson(analysisResultsAsJson, expected)
+          AssertionUtils.assertSameJson(analysisResultsAsJson, expected)
         }
       }
   }
@@ -258,21 +258,6 @@ class MetricsRepositoryMultipleResultsLoaderTest extends WordSpec with Matchers
 
   private[this] def assertSameRows(dataframeA: DataFrame, dataframeB: DataFrame): Unit = {
     assert(dataframeA.collect().toSet == dataframeB.collect().toSet)
-  }
-
-  private[this] def assertSameJson(jsonA: String, jsonB: String): Unit = {
-    val a = SimpleResultSerde.deserialize(jsonA)
-    val b = SimpleResultSerde.deserialize(jsonB)
-
-    implicit object OrderingTestMap extends Ordering[Map[String,Any]]{
-      override def compare(x: Map[String, Any],y: Map[String, Any]): Int = {
-        val instance: Map[String,Any] => String  =
-          _.get("instance").fold("")(_.asInstanceOf[String])
-        instance(x).compareTo(instance(y))
-      }
-    }
-
-    assert(a.sorted == b.sorted)
   }
 
 }
