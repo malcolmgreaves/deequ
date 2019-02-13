@@ -21,7 +21,7 @@ import com.amazon.deequ.metrics.Metric
 import com.amazon.deequ.utils.FixtureSupport
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{Matchers, WordSpec}
-//import org.apache.spark.sql.functions.{expr, rand}
+import org.apache.spark.sql.functions.{expr, rand}
 
 class StateAggregationTests extends WordSpec with Matchers with SparkContextSpec
   with FixtureSupport {
