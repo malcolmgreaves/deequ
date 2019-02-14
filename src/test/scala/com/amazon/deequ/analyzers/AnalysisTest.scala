@@ -318,8 +318,9 @@ class AnalysisTest extends WordSpec with Matchers with SparkContextSpec with Fix
         assert(analyzerContext.metricMap(Entropy("]att1[")).value.compareOuterAndInnerFailureTypes(
           Failure(new MetricCalculationRuntimeException(aggregationException))))
 
-        assert(analyzerContext.metricMap(Uniqueness("]att1[")).value.compareOuterAndInnerFailureTypes(
-          Failure(new MetricCalculationRuntimeException(aggregationException))))
+        assert(analyzerContext.metricMap(Uniqueness("]att1[")).value
+          .compareOuterAndInnerFailureTypes(
+            Failure(new MetricCalculationRuntimeException(aggregationException))))
       }
   }
 

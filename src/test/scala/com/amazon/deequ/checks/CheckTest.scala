@@ -336,9 +336,11 @@ class CheckTest extends WordSpec with Matchers with SparkContextSpec with Fixtur
       assertSuccess(baseCheck.hasMax("]att1[", _ == 6.0), contextNumeric)
       assertSuccess(baseCheck.hasMean("]att1[", _ == 3.5), contextNumeric)
       assertSuccess(baseCheck.hasSum("]att1[", _ == 21.0), contextNumeric)
-      assertSuccess(baseCheck.hasStandardDeviation("]att1[", _ == 1.707825127659933), contextNumeric)
+      assertSuccess(baseCheck.hasStandardDeviation("]att1[", _ == 1.707825127659933),
+        contextNumeric)
       assertSuccess(baseCheck.hasApproxCountDistinct("]att1[", _ == 6.0), contextNumeric)
-      assertSuccess(baseCheck.hasApproxQuantile("]att1[", quantile = 0.5, _ == 3.0), contextNumeric)
+      assertSuccess(baseCheck.hasApproxQuantile("]att1[", quantile = 0.5, _ == 3.0),
+        contextNumeric)
 
       val correlationAnalysis = Analysis().addAnalyzer(Correlation("]att1[", "att2"))
 

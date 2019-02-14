@@ -69,7 +69,7 @@ object ColumnName {
     * If both fail, then an `IllegalArgumentException` is thrown and its message contains
     * both of the `SanitizeError` messages.
     * */
-  def getOrThrow(x: (Sanitized, Sanitized)): (String,String) = x match {
+  def getOrThrow(x: (Sanitized, Sanitized)): (String, String) = x match {
     case (Right(cA), Right(cB)) => (cA, cB)
     case (Left(eA), Left(eB)) => throw new IllegalArgumentException(
       s"Cannot sanitize two column names:\n$eA\n$eB"
@@ -88,15 +88,17 @@ object ColumnName {
       ""
     } else {
       val woPrefix =
-        if (maybeSanitizedName.startsWith("`"))
+        if (maybeSanitizedName.startsWith("`")) {
           maybeSanitizedName.slice(1, maybeSanitizedName.length)
-        else
+        } else {
           maybeSanitizedName
+        }
       val woSuffix =
-        if (woPrefix.endsWith("`"))
+        if (woPrefix.endsWith("`")) {
           woPrefix.slice(0, woPrefix.length - 1)
-        else
+        } else {
           woPrefix
+        }
       woSuffix
     }
 

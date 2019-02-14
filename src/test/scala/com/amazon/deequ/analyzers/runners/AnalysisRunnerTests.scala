@@ -100,7 +100,8 @@ class AnalysisRunnerTests extends WordSpec with Matchers with SparkContextSpec w
 
         val df = getDfWithNumericValues(sparkSession)
 
-        val analyzers = Distinctness(Seq("]att1[", "att2")) :: Uniqueness(Seq("]att1[", "att2")) :: Nil
+        val analyzers = Distinctness(Seq("]att1[", "att2")) :: Uniqueness(Seq("]att1[", "att2")) ::
+          Nil
 
         val (separateResults, numSeparateJobs) = sparkMonitor.withMonitoringSession { stat =>
           val results = analyzers.map { _.calculate(df) }.toSet

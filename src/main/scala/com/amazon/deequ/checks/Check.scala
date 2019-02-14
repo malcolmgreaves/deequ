@@ -706,7 +706,7 @@ case class Check(
       hint: Option[String] = None)
     : CheckWithLastConstraintFilterable = {
 
-    val (cA,cB) = ColumnName.getOrThrow(
+    val (cA, cB) = ColumnName.getOrThrow(
       (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB))
     )
     satisfies(s"$cA < $cB", s"$columnA is less than $columnB", hint = hint)
@@ -770,7 +770,7 @@ case class Check(
     val (cA, cB) = ColumnName.getOrThrow(
       (ColumnName.sanitizeForSql(columnA), ColumnName.sanitizeForSql(columnB))
     )
-    satisfies(s"$cA >= $cB", s"$columnA is greater than or equal to $columnB",hint = hint)
+    satisfies(s"$cA >= $cB", s"$columnA is greater than or equal to $columnB", hint = hint)
   }
 
   // We can't use default values here as you can't combine default values and overloading in Scala

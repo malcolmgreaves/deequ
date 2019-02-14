@@ -26,7 +26,7 @@ class ColumnNameTest extends WordSpec with Matchers {
       val c = "`escaped_column_name`"
       ColumnName.sanitizeForSql(c) match {
         case Right(x) => assert(c == x)
-        case Left(x)  => fail(x.getMessage)
+        case Left(x) => fail(x.getMessage)
       }
     }
 
@@ -34,7 +34,7 @@ class ColumnNameTest extends WordSpec with Matchers {
       val c = "almost_escaped_column_name`"
       ColumnName.sanitizeForSql(c) match {
         case Right(x) => assert(x == s"`$c")
-        case Left(x)  => fail(x.getMessage)
+        case Left(x) => fail(x.getMessage)
       }
     }
 
@@ -42,7 +42,7 @@ class ColumnNameTest extends WordSpec with Matchers {
       val c = "`almost_escaped_column_name"
       ColumnName.sanitizeForSql(c) match {
         case Right(x) => assert(x == s"$c`")
-        case Left(x)  => fail(x.getMessage)
+        case Left(x) => fail(x.getMessage)
       }
     }
 
@@ -50,21 +50,21 @@ class ColumnNameTest extends WordSpec with Matchers {
       val c = "]not escaped na[m]e[ "
       ColumnName.sanitizeForSql(c) match {
         case Right(x) => assert(x == s"`$c`")
-        case Left(x)  => fail(x.getMessage)
+        case Left(x) => fail(x.getMessage)
       }
     }
 
     "fail to sanitize a column with a ` in the name" in {
       val c = "cannot_`_sanitize"
       ColumnName.sanitizeForSql(c) match {
-        case Left(ColumnNameHasBackticks(column))  => assert(column == c)
+        case Left(ColumnNameHasBackticks(column)) => assert(column == c)
         case x => fail(s"Expecting ColumnNameHasBackticks, not: $x")
       }
     }
 
     "fail to sanitize a null column name" in {
       ColumnName.sanitizeForSql(null) match {
-        case Left(NullColumn)  => ()
+        case Left(NullColumn) => ()
         case x => fail(s"Expecting EmptyColumn, not: $x")
       }
     }
@@ -112,7 +112,6 @@ class ColumnNameTest extends WordSpec with Matchers {
         assert(d == originalDesanitized)
         d
       }
-
     }
 
   }
