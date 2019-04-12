@@ -16,6 +16,7 @@
 
 package com.amazon.deequ
 
+import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.{SQLContext, SparkSession}
 
@@ -73,6 +74,8 @@ trait SparkContextSpec {
     * @return sparkSession to be used
     */
   private def setupSparkSession = {
+    Logger.getLogger("org").setLevel(Level.OFF)
+    Logger.getLogger("akka").setLevel(Level.OFF)
     val session = SparkSession.builder()
       .master("local")
       .appName("test")
